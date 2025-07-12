@@ -6,7 +6,9 @@ import re
 # Note that some demands are "skipped" by our given input, i.e. D166 is not the 166th demand, could be the 151st demand or similar.
 
 def parse_nodes(filename):
+    # returns dictionary that maps node name to id
     nodes = {}
+    nodeids: dict[str, int] = {}
     with open(filename) as f:
         for line in f:
             line = line.strip()
@@ -17,12 +19,16 @@ def parse_nodes(filename):
             if not m:
                 continue
             name, lon, lat = m.groups()
+            nodeids[name] = len(nodeids)  # Assign a unique ID starting from 0
             nodes[name] = (float(lon), float(lat))
-    return nodes
+    return nodeids
 
 def parse_links(filename):
-    links = {}
-    modules = {}
+    # returns three dictionaries: one that maps two vertices to a linkid, one that maps linkid to a routing cost, one that maps link id to a list of modules (capacity, cost)
+    nodeids = parse_nodes("nodes.txt")  # Assuming nodes are in a file named "nodes.txt"
+    modules: dict[int, list[tuple[float, float]]] = {}
+    linkids: dict[str, int] = {}
+    routing_costs: dict[int, int] = {}
     with open(filename) as f:
         for line in f:
             line = line.strip()
@@ -36,23 +42,23 @@ def parse_links(filename):
             if not m:
                 continue
             src, tgt, pre_cap, pre_cap_cost, routing_cost, setup_cost, mods = m.groups()
-            link_key = (src, tgt)
-            links[link_key] = {
-                'routing_cost': float(routing_cost),
-                'setup_cost': float(setup_cost),
-                'pre_cap': float(pre_cap),
-                'pre_cap_cost': float(pre_cap_cost)
-            }
+            linkid = len(linkids)  # Assign a unique ID starting from 0
+            src = nodeids[src]
+            tgt = nodeids[tgt]
+            linkids[f"{src} {tgt}"] = linkid
+            linkids[f"{tgt} {src}"] = linkid  # Add reverse link as well
+            routing_costs[linkid] = int(float(routing_cost))
             # Parse modules: <mod_cap> <mod_cost> pairs
             mod_list = []
             for mod in re.findall(r"([-\d.]+)\s+([-\d.]+)", mods):
                 cap, cost = map(float, mod)
                 mod_list.append((cap, cost))
-            modules[link_key] = mod_list
-    return links, modules
+            modules[linkid] = mod_list
+    return linkids, routing_costs, modules
 
 def parse_demands(filename):
     demands = []
+    nodeids = parse_nodes("nodes.txt")  # Assuming nodes are in a file named "nodes.txt"
     with open(filename) as f:
         for line in f:
             line = line.strip()
@@ -66,5 +72,5 @@ def parse_demands(filename):
             if not m:
                 continue
             src, tgt, val = m.groups()
-            demands.append({'src': src, 'tgt': tgt, 'val': float(val)})
+            demands.append((nodeids[src], nodeids[tgt], int(float(val))))
     return demands
