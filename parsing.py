@@ -46,7 +46,7 @@ def parse_links(filename):
             src = nodeids[src]
             tgt = nodeids[tgt]
             linkids[f"{src} {tgt}"] = linkid
-            linkids[f"{tgt} {src}"] = linkid  # Add reverse link as well
+            linkids[f"{tgt} {src}"] = linkid # Add reverse link as well
             routing_costs[linkid] = int(float(routing_cost))
             # Parse modules: <mod_cap> <mod_cost> pairs
             mod_list = []

@@ -1,6 +1,12 @@
 import pulp
 from parsing import parse_nodes, parse_links, parse_demands
 
+"""
+So we currently have some problems, we should redefine the model a little bit differently to handle the given undericted edges.
+We should create two edges for each edge, AND CREATE A CONSTRAINT that makes sure that the sum of the flows on both edges is less than the capacity of the edge,
+instead of having just one edge I guess.
+"""
+
 nodeids = parse_nodes("nodes.txt")
 linkids, routing_costs, modules = parse_links("links.txt")
 demands = parse_demands("demands.txt")
@@ -52,7 +58,7 @@ module_cost = pulp.lpSum(
     for e in E
     for m in y[e]
 )
-prob += routing_cost  # or: routing_cost + module_cost
+prob += routing_cost + module_cost
 
 # Flow conservation
 for s, t, d_val in D:
