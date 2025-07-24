@@ -32,6 +32,11 @@ E = {linkids[k]: (k.split()[0], k.split()[1], routing_costs[linkids[k]]) for k i
 M = modules
 D = demands
 
+print("Nodes:", V )
+print("Edges:", E)
+print("Modules:", M)
+print("Demands:", D)
+
 # Initialize problem
 prob = pulp.LpProblem("NetworkDesign", pulp.LpMinimize)
 
@@ -49,12 +54,12 @@ for e in E:
 
 # Objective: minimize routing cost (and optionally module cost)
 routing_cost = pulp.lpSum(
-    x[e][(s, t)] * E[e][2]
+    x[e][(s, t)] * E[e][2] # flow through edge e of flow (s, t) multiplied by routing cost
     for e in E
     for (s, t, _) in D
 )
 module_cost = pulp.lpSum(
-    y[e][m] * M[e][m][1]
+    y[e][m] * M[e][m][1] # decision * cost of module indexed "m" on edge e
     for e in E
     for m in y[e]
 )
@@ -80,8 +85,8 @@ for s, t, d_val in D:
 # Capacity constraints
 for e in E:
     prob += (
-        pulp.lpSum(x[e][(s, t)] for (s, t, _) in D) <=
-        pulp.lpSum(y[e][m] * M[e][m][0] for m in y[e])
+        pulp.lpSum(x[e][(s, t)] for (s, t, _) in D) <= # the total flow on edge e
+        pulp.lpSum(y[e][m] * M[e][m][0] for m in y[e]) # RHS: sum of selected module capacities on edge e
     ), f"cap_{e}"
 
 # One module per edge max
