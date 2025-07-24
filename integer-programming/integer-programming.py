@@ -1,5 +1,7 @@
 import pulp
 from parsing import parse_nodes, parse_links, parse_demands
+import matplotlib.pyplot as plt
+import numpy as np
 
 """
 So we currently have some problems, we should redefine the model a little bit differently to handle the given undericted edges.
@@ -29,18 +31,18 @@ demands = parse_demands("demands.txt")
 
 V = [i for i in range(len(nodeids))]  # Node IDs from 0 to n-1
 E = {
-    f"{linkids[link_id]}_fwd": (src, tgt, routing_costs[linkids[link_id]])
+    f"{linkids[link_id]}_fwd": (int(src), int(tgt), routing_costs[linkids[link_id]])
     for link_id in linkids
     for src, tgt in [link_id.split()]
 } | {
-    f"{linkids[link_id]}_rev": (tgt, src, routing_costs[linkids[link_id]])
+    f"{linkids[link_id]}_rev": (int(tgt), int(src), routing_costs[linkids[link_id]])
     for link_id in linkids
     for src, tgt in [link_id.split()]
 }
 M = modules
 D = demands
 
-print("Nodes:", V )
+print("Nodes:", V)
 print("Edges:", E)
 print("Modules:", M)
 print("Demands:", D)
@@ -52,24 +54,28 @@ prob = pulp.LpProblem("NetworkDesign", pulp.LpMinimize)
 x = {}  # flow variables: x[e][s][t]
 y = {}  # module installation: y[e][m]
 
+# Create flow variables for each directed edge
 for e in E:
     x[e] = {}
     for s, t, d in D:
         x[e][(s, t)] = pulp.LpVariable(f"x_{e}_{s}_{t}", lowBound=0)
-    base_id = e.split("_")[0] # get ID of undirected edge (we created two directed edges)
+
+# Create module variables for each base (undirected) edge
+for base_id in M:
     y[base_id] = {}
     for idx, (cap, cost) in enumerate(M[base_id]):
         y[base_id][idx] = pulp.LpVariable(f"y_{base_id}_{idx}", cat="Binary")
 
 # Objective: minimize routing cost (and optionally module cost)
 routing_cost = pulp.lpSum(
-    x[f"{e}_fwd"][(s, t)] * E[f"{e}_fwd"][2] + x[f"{e}_rev"][(s, t)] * E[f"{e}_rev"][2]  # flow through edge e of flow (s, t) multiplied by routing cost
+    # flow through edge e of flow (s, t) multiplied by routing cost
+    x[e][(s, t)] * E[e][2]
     for e in E
     for (s, t, _) in D
 )
 module_cost = pulp.lpSum(
-    y[e][m] * M[e][m][1] # decision * cost of module indexed "m" on edge e
-    for e in E
+    y[e][m] * M[e][m][1]  # decision * cost of module indexed "m" on edge e
+    for e in M  # iterate over base edge IDs in M
     for m in y[e]
 )
 prob += routing_cost + module_cost
@@ -78,10 +84,10 @@ prob += routing_cost + module_cost
 for s, t, d_val in D:
     for v in V:
         inflow = pulp.lpSum(
-            x[f"{e}_fwd"][(s, t)] for e in E if E[f"{e}_fwd"][1] == v
+            x[e][(s, t)] for e in E if E[e][1] == v
         )
         outflow = pulp.lpSum(
-            x[e][(s, t)] for e in E if E[e][0] == v or E[e][1] == v
+            x[e][(s, t)] for e in E if E[e][0] == v
         )
 
         if v == s:
@@ -92,17 +98,24 @@ for s, t, d_val in D:
             prob += (inflow == outflow), f"flow_bal_{s}_{t}_{v}"
 
 # Capacity constraints
-for e in E:
+for base_edge_id in M:  # iterate over base edge IDs
+    # Sum flows on both directions of the undirected edge
+    total_flow_on_edge = pulp.lpSum(
+        x[f"{base_edge_id}_fwd"][(s, t)] + x[f"{base_edge_id}_rev"][(s, t)]
+        for (s, t, _) in D
+    )
     prob += (
-        pulp.lpSum(x[e][(s, t)] for (s, t, _) in D) <= # the total flow on edge e
-        pulp.lpSum(y[e][m] * M[e][m][0] for m in y[e]) # RHS: sum of selected module capacities on edge e
-    ), f"cap_{e}"
+        total_flow_on_edge <=  # the total flow on both directions of the undirected edge
+        # RHS: sum of selected module capacities on edge
+        pulp.lpSum(y[base_edge_id][m] * M[base_edge_id][m][0]
+                   for m in y[base_edge_id])
+    ), f"cap_{base_edge_id}"
 
 # One module per edge max
-for e in E:
+for base_edge_id in M:  # iterate over base edge IDs
     prob += (
-        pulp.lpSum(y[e][m] for m in y[e]) <= 1
-    ), f"one_module_{e}"
+        pulp.lpSum(y[base_edge_id][m] for m in y[base_edge_id]) <= 1
+    ), f"one_module_{base_edge_id}"
 
 # Solve
 prob.solve()
@@ -111,10 +124,11 @@ prob.solve()
 print("Status:", pulp.LpStatus[prob.status])
 print("Total cost:", pulp.value(prob.objective))
 
-for e in E:
-    for m in y[e]:
-        if pulp.value(y[e][m]) > 0.5:
-            print(f"Install module {m} on edge {e} with cap {M[e][m][0]}")
+for base_edge_id in M:  # iterate over base edge IDs
+    for m in y[base_edge_id]:
+        if pulp.value(y[base_edge_id][m]) > 0.5:
+            print(
+                f"Install module {m} on edge {base_edge_id} with cap {M[base_edge_id][m][0]}")
 
 for e in E:
     for (s, t, _) in D:
