@@ -1,2 +1,2 @@
--r ./genetic/requirements.txt
--r ./integer-programming/requirements.txt
+-r ./genetic/genetic-req.txt
+-r ./integer-programming/int-prog-req.txt
