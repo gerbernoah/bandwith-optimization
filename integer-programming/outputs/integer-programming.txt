@@ -1,0 +1,8 @@
+Status: Infeasible
+Total cost: N/A
+
+Used links and installed capacities:
+No solution found.
+
+Paths for each demand:
+No paths found.
