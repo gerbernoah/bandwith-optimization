@@ -28,7 +28,15 @@ demands = parse_demands("demands.txt")
 # ]
 
 V = [i for i in range(len(nodeids))]  # Node IDs from 0 to n-1
-E = {linkids[k]: (k.split()[0], k.split()[1], routing_costs[linkids[k]]) for k in linkids.keys()}  # Edge ID to (source, target, routing cost)
+E = {
+    f"{linkids[link_id]}_fwd": (src, tgt, routing_costs[linkids[link_id]])
+    for link_id in linkids
+    for src, tgt in [link_id.split()]
+} | {
+    f"{linkids[link_id]}_rev": (tgt, src, routing_costs[linkids[link_id]])
+    for link_id in linkids
+    for src, tgt in [link_id.split()]
+}
 M = modules
 D = demands
 
@@ -48,13 +56,14 @@ for e in E:
     x[e] = {}
     for s, t, d in D:
         x[e][(s, t)] = pulp.LpVariable(f"x_{e}_{s}_{t}", lowBound=0)
-    y[e] = {}
-    for idx, (cap, cost) in enumerate(M[e]):
-        y[e][idx] = pulp.LpVariable(f"y_{e}_{idx}", cat="Binary")
+    base_id = e.split("_")[0] # get ID of undirected edge (we created two directed edges)
+    y[base_id] = {}
+    for idx, (cap, cost) in enumerate(M[base_id]):
+        y[base_id][idx] = pulp.LpVariable(f"y_{base_id}_{idx}", cat="Binary")
 
 # Objective: minimize routing cost (and optionally module cost)
 routing_cost = pulp.lpSum(
-    x[e][(s, t)] * E[e][2] # flow through edge e of flow (s, t) multiplied by routing cost
+    x[f"{e}_fwd"][(s, t)] * E[f"{e}_fwd"][2] + x[f"{e}_rev"][(s, t)] * E[f"{e}_rev"][2]  # flow through edge e of flow (s, t) multiplied by routing cost
     for e in E
     for (s, t, _) in D
 )
@@ -69,7 +78,7 @@ prob += routing_cost + module_cost
 for s, t, d_val in D:
     for v in V:
         inflow = pulp.lpSum(
-            x[e][(s, t)] for e in E if E[e][1] == v or E[e][0] == v
+            x[f"{e}_fwd"][(s, t)] for e in E if E[f"{e}_fwd"][1] == v
         )
         outflow = pulp.lpSum(
             x[e][(s, t)] for e in E if E[e][0] == v or E[e][1] == v
