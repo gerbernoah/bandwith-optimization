@@ -190,18 +190,17 @@ class IntegerProgrammingOptimizer:
             status = pulp.LpStatusNotSolved
         except Exception as e:
             print(f"❌ Solver error: {e}")
-            print("   Falling back to traditional solving...")
 
-            # Fall back to traditional solving
+            # Only fall back for direct solver model approaches (CPLEX_PY, GUROBI_PY)
+            # Traditional solvers like CBC don't need fallback as they use the same approach
+
+            print("   Falling back to CBC solver...")
             try:
-                if solver_name == "PULP_CBC_CMD":
-                    if self.time_limit and self.time_limit > 0:
-                        options = [f"seconds {self.time_limit}"]
-                        solver = pulp.PULP_CBC_CMD(msg=msg, options=options)
-                    else:
-                        solver = pulp.PULP_CBC_CMD(msg=msg)
-                else:
-                    solver = pulp.getSolver(solver_name, msg=msg)
+                # Fall back to CBC when commercial solvers fail
+                if self.time_limit and self.time_limit > 0:
+                    options = [f"seconds {self.time_limit}"]
+
+                solver = pulp.PULP_CBC_CMD(msg=msg, options=options)
 
                 status = prob.solve(solver)
             except KeyboardInterrupt:
@@ -214,21 +213,52 @@ class IntegerProgrammingOptimizer:
         # Calculate solve time
         self.solve_time = time.time() - self.start_time if self.start_time else 0
 
-        # Extract solution and objective value
+        # Extract solution and objective value with proper status checking
         solution = None
         objective_value = None
+        actual_status = pulp.LpStatus[status]
 
-        if status == pulp.LpStatusOptimal:
+        # For CBC, always check if we hit the time limit regardless of reported status
+        time_limit_reached = False
+        if solver_name == "PULP_CBC_CMD" and self.time_limit:
+            # CBC often reports "Optimal" even when hitting time limit
+            time_limit_reached = self.solve_time >= self.time_limit * 0.95
+
+        # Check if we have a feasible solution
+        has_solution = status in [pulp.LpStatusOptimal, pulp.LpStatusNotSolved]
+
+        # For CBC solver, check if we actually have variable values even if status isn't optimal
+        if not has_solution and solver_name == "PULP_CBC_CMD":
+            # Try to extract solution anyway - CBC might have found a feasible solution
+            try:
+                test_solution = self._extract_solution(y)
+                if test_solution and any(pulp.value(y[link_id][0]) is not None for link_id in self.link_ids):
+                    has_solution = True
+            except:
+                pass
+
+        if has_solution:
             try:
                 solution = self._extract_solution(y)
                 objective_value = pulp.value(prob.objective)
+
+                # Store variables for flow calculation
+                self._last_solution_variables = {'x': x, 'y': y}
+
+                # Override status if we hit time limit
+                if time_limit_reached:
+                    actual_status = "Feasible (Time Limit)"
+                    print(
+                        f"⚠️  Time limit reached ({self.solve_time:.1f}s/{self.time_limit}s) - solution may not be optimal")
+
             except Exception as e:
-                print(f"Error extracting optimal solution: {e}")
+                print(f"Error extracting solution: {e}")
                 solution = None
                 objective_value = None
+                actual_status = "Error"
         else:
             print(
-                f"Solver finished with status: {pulp.LpStatus[status]} - no solution available")
+                f"Solver finished with status: {actual_status} - no solution available")
             solution = None
             objective_value = float('inf')
 
@@ -237,7 +267,7 @@ class IntegerProgrammingOptimizer:
             'best_fitness': objective_value if objective_value is not None else float('inf'),
             'optimizer': self,
             'total_time': self.solve_time,
-            'status': pulp.LpStatus[status],
+            'status': actual_status,
             'problem': prob,
             'variables': {'x': x, 'y': y}
         }
@@ -286,6 +316,36 @@ class IntegerProgrammingOptimizer:
             solution.append(selected_module)
         return solution
 
+    def _get_actual_link_flows_from_solution(self):
+        """
+        Extract actual flow values for each link from the optimization solution
+        This gives us the true demand on each link as determined by the optimization
+        """
+        if not hasattr(self, '_last_solution_variables'):
+            # Fallback to direct demand calculation if no solution variables available
+            return self._get_all_link_demands()
+
+        x_vars = self._last_solution_variables.get('x', {})
+        flow_on_links = {}
+
+        for link_id in self.link_ids:
+            total_flow = 0.0
+
+            # Sum flow in both directions for this link
+            for direction in ['fwd', 'rev']:
+                edge_key = f"{link_id}_{direction}"
+                if edge_key in x_vars:
+                    # Sum all demand flows on this directed edge
+                    for (s, t, _) in self.D:
+                        if (s, t) in x_vars[edge_key]:
+                            flow_value = pulp.value(x_vars[edge_key][(s, t)])
+                            if flow_value is not None:
+                                total_flow += flow_value
+
+            flow_on_links[link_id] = total_flow
+
+        return flow_on_links
+
     def get_solution_details(self, solution):
         """Get detailed solution information similar to genetic algorithm"""
         if solution is None:
@@ -296,6 +356,9 @@ class IntegerProgrammingOptimizer:
         total_capacity_violations = 0
         total_unmet_demand = 0.0
 
+        # Get the actual flow values from the optimization solution
+        flow_on_links = self._get_actual_link_flows_from_solution()
+
         for i, link_id in enumerate(self.link_ids):
             link = self.network.links[link_id]
             module_choice = int(solution[i])
@@ -304,7 +367,9 @@ class IntegerProgrammingOptimizer:
             capacity_options = link.get_total_capacity_options()
             if module_choice < len(capacity_options):
                 capacity, cost = capacity_options[module_choice]
-                demand = self._get_link_demand(link_id)
+
+                # Use actual flow from optimization solution, not just direct demands
+                demand = flow_on_links.get(link_id, 0.0)
 
                 # Module selection details
                 if module_choice == 0:
@@ -350,8 +415,8 @@ class IntegerProgrammingOptimizer:
                 link_details.append(link_detail)
                 total_cost += cost
 
-        # Calculate network statistics
-        total_demand = sum(self._get_all_link_demands().values())
+        # Calculate network statistics using actual flows
+        total_demand = sum(flow_on_links.values())
         total_capacity = sum(detail['total_capacity']
                              for detail in link_details)
 

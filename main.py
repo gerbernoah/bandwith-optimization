@@ -313,7 +313,8 @@ def create_detailed_analysis_plots(ip_results, ga_results):
 
 def create_performance_analysis_plots(ip_results, ga_results):
     """Create performance and convergence analysis plots."""
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
+    fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)
+          ) = plt.subplots(2, 3, figsize=(24, 12))
 
     ip_details = ip_results['solution_details']
     ga_details = ga_results['solution_details']
@@ -438,7 +439,74 @@ def create_performance_analysis_plots(ip_results, ga_results):
         ax3.text(bar.get_x() + bar.get_width()/2., height + 0.02,
                  labels[i], ha='center', va='bottom', fontsize=9)
 
-    # 4. Algorithm Trade-off Analysis (Pareto Front Style)
+    # 4. Average Optimal Norm over Generation/Iteration
+    if ga_results.get('average_fitness_history'):
+        generations = list(
+            range(1, len(ga_results['average_fitness_history']) + 1))
+        ga_avg_fitness = ga_results['average_fitness_history']
+
+        ax4.plot(generations, ga_avg_fitness, 'o-', color='#A23B72',
+                 linewidth=2, markersize=4, label='GA Average Fitness')
+
+        # Add IP optimal line as reference (single point since IP doesn't iterate)
+        ax4.axhline(y=ip_results['best_fitness'], color='#2E86AB',
+                    linestyle='--', linewidth=2, alpha=0.8, label='IP Optimal Reference')
+
+        ax4.set_title('Average Optimal Norm Over Generations',
+                      fontsize=14, fontweight='bold')
+        ax4.set_xlabel('Generation/Iteration')
+        ax4.set_ylabel('Average Fitness (Higher is Better)')
+        ax4.legend()
+        ax4.grid(True, alpha=0.3)
+
+        # Fill area under curve for better visualization
+        ax4.fill_between(generations, ga_avg_fitness,
+                         alpha=0.3, color='#A23B72')
+    else:
+        # If no GA data, just show IP point
+        ax4.scatter([1], [ip_results['best_fitness']], color='#2E86AB',
+                    s=100, label='IP Optimal', alpha=0.8)
+        ax4.set_title('Average Optimal Norm Over Generations',
+                      fontsize=14, fontweight='bold')
+        ax4.set_xlabel('Generation/Iteration')
+        ax4.set_ylabel('Average Fitness (Higher is Better)')
+        ax4.legend()
+        ax4.grid(True, alpha=0.3)
+
+    # 5. Time per Generation/Iteration
+    if ga_results.get('plotting_data', {}).get('execution_timeline', {}).get('time_per_generation'):
+        generations = list(range(1, len(
+            ga_results['plotting_data']['execution_timeline']['time_per_generation']) + 1))
+        time_per_gen = ga_results['plotting_data']['execution_timeline']['time_per_generation']
+
+        ax5.plot(generations, time_per_gen, 'o-', color='#28A745',
+                 linewidth=2, markersize=4, label='GA Time per Generation')
+
+        # Add IP time as reference (single point)
+        ax5.scatter([1], [ip_results['total_time']], color='#2E86AB',
+                    s=100, label='IP Total Time', alpha=0.8)
+
+        ax5.set_title('Computation Time per Generation/Iteration',
+                      fontsize=14, fontweight='bold')
+        ax5.set_xlabel('Generation/Iteration')
+        ax5.set_ylabel('Time (seconds)')
+        ax5.legend()
+        ax5.grid(True, alpha=0.3)
+
+        # Fill area under curve
+        ax5.fill_between(generations, time_per_gen, alpha=0.3, color='#28A745')
+    else:
+        # If no GA timing data, just show IP point
+        ax5.scatter([1], [ip_results['total_time']], color='#2E86AB',
+                    s=100, label='IP Total Time', alpha=0.8)
+        ax5.set_title('Computation Time per Generation/Iteration',
+                      fontsize=14, fontweight='bold')
+        ax5.set_xlabel('Generation/Iteration')
+        ax5.set_ylabel('Time (seconds)')
+        ax5.legend()
+        ax5.grid(True, alpha=0.3)
+
+    # 6. Algorithm Trade-off Analysis (Pareto Front Style)
     algorithms = ['Integer Programming', 'Genetic Algorithm']
     total_costs = [ip_details['total_cost'] + ip_details.get('total_penalty', 0),
                    ga_details['total_cost'] + ga_details['total_penalty']]
@@ -451,20 +519,20 @@ def create_performance_analysis_plots(ip_results, ga_results):
     sizes = [300, 300]  # Base size for bubbles
 
     for i, (alg, cost, time, quality) in enumerate(zip(algorithms, total_costs, solution_times, solution_quality)):
-        ax4.scatter(time, cost, s=sizes[i], alpha=0.7, color=colors[i],
+        ax6.scatter(time, cost, s=sizes[i], alpha=0.7, color=colors[i],
                     edgecolors='black', linewidth=2, label=f'{alg}\n(Quality: {quality:.1f}%)')
 
         # Add algorithm name as annotation
-        ax4.annotate(alg.split()[0], (time, cost),
+        ax6.annotate(alg.split()[0], (time, cost),
                      xytext=(10, 10), textcoords='offset points',
                      fontsize=10, fontweight='bold')
 
-    ax4.set_title('Algorithm Trade-off Analysis\n(Cost vs Time vs Quality)',
+    ax6.set_title('Algorithm Trade-off Analysis\n(Cost vs Time vs Quality)',
                   fontsize=14, fontweight='bold')
-    ax4.set_xlabel('Solution Time (seconds)')
-    ax4.set_ylabel('Total Cost ($)')
-    ax4.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    ax4.grid(True, alpha=0.3)
+    ax6.set_xlabel('Solution Time (seconds)')
+    ax6.set_ylabel('Total Cost ($)')
+    ax6.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax6.grid(True, alpha=0.3)
 
     plt.tight_layout()
     plt.suptitle('Performance Analysis: Convergence, Robustness & Trade-offs',
@@ -498,16 +566,34 @@ def print_summary(algorithm_name, results):
         f"Links with Modules: {modules_selected}/{total_links} ({modules_selected/total_links*100:.1f}%)")
 
 
+def genetic_algorithm():
+    return run_genetic_algorithm(
+        num_generations=50,
+        sol_per_pop=50,
+        num_parents_mating=20,
+        time_limit=20*60,
+        msg=False
+    )
+
+
+def integer_programming():
+    return run_integer_programming(
+        solver_name="GUROBI",
+        time_limit=20*60,
+        msg=False
+    )
+
+
 def main(algorithm="both"):
     """Main function to run optimization algorithms."""
     if algorithm == "genetic":
         print("Running Genetic Algorithm...")
-        results = run_genetic_algorithm(num_generations=30, time_limit=10)
+        results = genetic_algorithm()
         print_summary("Genetic Algorithm", results)
 
     elif algorithm == "ip":
         print("Running Integer Programming...")
-        results = run_integer_programming(time_limit=10)
+        results = integer_programming()
         print_summary("Integer Programming", results)
 
     else:  # both
@@ -520,15 +606,10 @@ def main(algorithm="both"):
 
             # Submit both tasks
             ga_future = executor.submit(
-                run_genetic_algorithm,
-                num_generations=30,
-                time_limit=60,
-                msg=False
+                genetic_algorithm,
             )
             ip_future = executor.submit(
-                run_integer_programming,
-                time_limit=60,
-                msg=False
+                integer_programming(),
             )
 
             # Wait for results
@@ -559,6 +640,7 @@ def main(algorithm="both"):
             print("Both algorithms achieved similar costs")
 
         print(f"IP Optimal: {ip_results.get('status') == 'Optimal'}")
+        print(f"IP Status: {ip_results.get('status')}")
         print(f"GA Timeout: {ga_results.get('timeout_occurred', False)}")
 
         # Create comprehensive comparison plots

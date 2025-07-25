@@ -15,12 +15,11 @@ NetworkGraph = network_module.NetworkGraph
 class GeneticAlgorithmOptimizer:
     """Genetic Algorithm implementation for network optimization"""
 
-    def __init__(self, network: NetworkGraph, time_limit=None, ensure_one_iteration=False, msg=False):
+    def __init__(self, network: NetworkGraph, time_limit=None, msg=False):
         self.network = network
         self.link_ids = list(network.links.keys())
         self.num_genes = len(self.link_ids)
         self.time_limit = time_limit
-        self.ensure_one_iteration = ensure_one_iteration
         self.start_time = None
         self.timeout_occurred = False
         self.msg = msg
@@ -156,7 +155,7 @@ class GeneticAlgorithmOptimizer:
             elapsed_time = time.time() - self.start_time
             if elapsed_time > self.time_limit:
                 # Check if we should ensure at least one iteration
-                if self.ensure_one_iteration and ga_instance.generations_completed == 0:
+                if ga_instance.generations_completed == 0:
                     if self.msg:
                         print(
                             f"⏰ Time limit reached ({elapsed_time:.2f}s / {self.time_limit}s)")
@@ -463,8 +462,7 @@ def main():
 
 
 def run_genetic_algorithm(nodes_file="nodes.txt", links_file="links.txt", demands_file="demands.txt",
-                          num_generations=50, sol_per_pop=50, num_parents_mating=20, time_limit=None,
-                          ensure_one_iteration=False, msg=False):
+                          num_generations=50, sol_per_pop=50, num_parents_mating=20, time_limit=None, msg=False):
     """
     Run genetic algorithm optimization and return results for external plotting/analysis.
 
@@ -476,7 +474,6 @@ def run_genetic_algorithm(nodes_file="nodes.txt", links_file="links.txt", demand
         sol_per_pop: Population size
         num_parents_mating: Number of parents for mating
         time_limit: Maximum time in seconds (None for no limit)
-        ensure_one_iteration: If True, ensures at least one generation completes even if timeout occurs
         msg: Whether to show solver messages
 
     Returns:
@@ -512,7 +509,7 @@ def run_genetic_algorithm(nodes_file="nodes.txt", links_file="links.txt", demand
 
     # Create optimizer with time limit and message settings
     optimizer = GeneticAlgorithmOptimizer(
-        network, time_limit=time_limit, ensure_one_iteration=ensure_one_iteration, msg=msg)
+        network, time_limit=time_limit, msg=msg)
 
     # Run optimization
     results = optimizer.optimize(
