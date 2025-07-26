@@ -5,6 +5,7 @@ import time
 from typing import Dict
 import numpy as np
 import pygad
+from result import ResultGA
 
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -93,10 +94,10 @@ class GeneticAlgorithmOptimizer:
                     total_capacity_utilization += utilization
                 elif demand > capacity:
                     # Capacity constraint violated - heavy penalty
-                    penalty += (demand - capacity) * 10000
+                    penalty += (demand - capacity) * 1000000000
             else:
                 # Invalid choice - add penalty
-                penalty += 100000
+                penalty += 10000000000
 
         # Check for unmet demands (links with 0 capacity but positive demand)
         for link_id, demand in self._get_all_link_demands().items():
@@ -104,10 +105,10 @@ class GeneticAlgorithmOptimizer:
                 capacity = link_capacities[link_id]
                 if capacity == 0:
                     # No capacity installed but demand exists
-                    penalty += demand * 5000
+                    penalty += demand * 500000000
                 elif demand > capacity:
                     # Insufficient capacity
-                    penalty += (demand - capacity) * 1000
+                    penalty += (demand - capacity) * 100000000
 
         # Fitness should be maximized, so we need to transform the cost minimization problem
         # Use a large baseline value minus costs and penalties
@@ -218,20 +219,9 @@ class GeneticAlgorithmOptimizer:
             self.convergence_data.append(0.0)
 
     def optimize(self, num_generations=100, sol_per_pop=50, num_parents_mating=25):
-        """Run the genetic algorithm optimization"""
+        """Run the genetic algorithm optimization and return a ResultGA object"""
         self.start_time = time.time()
         self.timeout_occurred = False
-
-        # Print initial message if msg is enabled
-        if self.msg:
-            print(f"Starting Genetic Algorithm Optimization...")
-            print(f"Population size: {sol_per_pop}")
-            print(f"Generations: {num_generations}")
-            print(f"Parents for mating: {num_parents_mating}")
-            print(f"Links to optimize: {len(self.link_ids)}")
-            if self.time_limit:
-                print(f"Time limit: {self.time_limit} seconds")
-            print("-" * 60)
 
         # Create initial population
         initial_population = self.create_initial_population(sol_per_pop)
@@ -243,7 +233,6 @@ class GeneticAlgorithmOptimizer:
             num_options = len(link.get_total_capacity_options())
             gene_space.append(list(range(num_options)))
 
-        # Create GA instance
         ga_instance = pygad.GA(
             num_generations=num_generations,
             num_parents_mating=num_parents_mating,
@@ -260,51 +249,20 @@ class GeneticAlgorithmOptimizer:
             on_generation=self.on_generation
         )
 
-        # Run optimization
         try:
             ga_instance.run()
         except (KeyboardInterrupt, TimeoutError):
             self.timeout_occurred = True
-            if self.msg:
-                print("Optimization stopped due to timeout or interruption")
 
-        # Get the best solution
         solution, solution_fitness, solution_idx = ga_instance.best_solution()
-
-        # Calculate final timing
         total_time = time.time() - self.start_time if self.start_time else 0
+        actual_cost, penalty_cost = self.get_solution_cost(solution)
+        details = self.get_solution_details(solution)
 
-        # Print final results if msg is enabled
-        if self.msg:
-            print("-" * 60)
-            print("Optimization Complete!")
-            print(f"Total time: {total_time:.2f} seconds")
-            print(
-                f"Generations completed: {ga_instance.generations_completed}")
-            print(f"Timeout occurred: {self.timeout_occurred}")
-            actual_cost, penalty_cost = self.get_solution_cost(solution)
-            print(f"Final best fitness: {solution_fitness:.2f}")
-            print(f"Final actual cost: ${actual_cost:.2f}")
-            print(f"Final penalty cost: ${penalty_cost:.2f}")
-
-        # Return comprehensive results
-        return {
-            'ga_instance': ga_instance,
-            'best_solution': solution,
-            'best_fitness': solution_fitness,
-            'best_solutions_history': self.best_solutions.copy(),
-            'fitness_history': self.best_fitness_values.copy(),
-            'average_fitness_history': self.average_fitness_values.copy(),
-            'population_diversity_history': self.population_diversity.copy(),
-            'convergence_history': self.convergence_data.copy(),
-            'generation_times': self.generation_times.copy(),
-            'optimizer': self,
-            'timeout_occurred': self.timeout_occurred,
-            'total_time': total_time,
-            'generations_completed': ga_instance.generations_completed,
-            'final_population_size': ga_instance.sol_per_pop,
-            'solution_details': self.get_solution_details(solution)
-        }
+        return ResultGA(
+            total_runtime=total_time,
+            total_cost=actual_cost,
+        )
 
     def get_solution_cost(self, solution):
         """Calculate the actual cost of a solution (for reporting purposes)"""
@@ -447,7 +405,7 @@ class GeneticAlgorithmOptimizer:
 
 def main():
     """Main function to demonstrate the genetic algorithm"""
-    results = run_genetic_algorithm(
+    return run_genetic_algorithm(
         nodes_file="nodes.txt",
         links_file="links.txt",
         demands_file="demands.txt",
@@ -457,8 +415,6 @@ def main():
         time_limit=10,
         msg=True,
     )
-
-    return results
 
 
 def run_genetic_algorithm(nodes_file="nodes.txt", links_file="links.txt", demands_file="demands.txt",
@@ -475,99 +431,17 @@ def run_genetic_algorithm(nodes_file="nodes.txt", links_file="links.txt", demand
         num_parents_mating: Number of parents for mating
         time_limit: Maximum time in seconds (None for no limit)
         msg: Whether to show solver messages
-
-    Returns:
-        dict: Contains all optimization results including:
-            - 'best_solution': The best solution found
-            - 'best_fitness': Fitness of best solution
-            - 'fitness_history': List of best fitness values per generation
-            - 'average_fitness_history': List of average population fitness per generation
-            - 'population_diversity_history': List of population diversity per generation
-            - 'convergence_history': List of fitness improvements per generation
-            - 'generation_times': List of cumulative time at each generation
-            - 'best_solutions_history': List of best solutions per generation
-            - 'optimizer': The optimizer instance for further analysis
-            - 'ga_instance': The GA instance
-            - 'network': The network graph
-            - 'cost_history': List of actual costs per generation
-            - 'penalty_history': List of penalty costs per generation
-            - 'utilization_history': List of network utilization per generation
-            - 'capacity_violation_history': List of capacity violations per generation
-            - 'timeout_occurred': Whether optimization was stopped due to time limit
-            - 'total_time': Total optimization time in seconds
-            - 'generations_completed': Number of generations actually completed
-            - 'solution_details': Detailed analysis of the final solution
-            - 'plotting_data': Structured data specifically for creating visualizations:
-                * 'generations': Generation numbers for x-axis
-                * 'execution_timeline': Timing data for performance analysis
-                * 'performance_metrics': Improvement and convergence metrics
-                * 'solution_quality': Quality metrics over time
     """
-    # Create network and load data from files
     network = NetworkGraph()
     network.load_from_files(nodes_file, links_file, demands_file)
-
-    # Create optimizer with time limit and message settings
-    optimizer = GeneticAlgorithmOptimizer(
-        network, time_limit=time_limit, msg=msg)
-
-    # Run optimization
-    results = optimizer.optimize(
+    optimizer = GeneticAlgorithmOptimizer(network, time_limit=time_limit, msg=msg)
+    # Directly return the ResultGA object
+    return optimizer.optimize(
         num_generations=num_generations,
         sol_per_pop=sol_per_pop,
         num_parents_mating=num_parents_mating
     )
 
-    # Add network to results
-    results['network'] = network
-
-    # Calculate cost history for plotting
-    cost_history = []
-    penalty_history = []
-    utilization_history = []
-    capacity_violation_history = []
-
-    for solution in results['best_solutions_history']:
-        actual_cost, penalty_cost = optimizer.get_solution_cost(solution)
-        cost_history.append(actual_cost)
-        penalty_history.append(penalty_cost)
-
-        # Get detailed solution info for additional metrics
-        solution_details = optimizer.get_solution_details(solution)
-        utilization_history.append(
-            solution_details['utilization_stats']['network_overall'])
-        capacity_violation_history.append(
-            solution_details['capacity_violations'])
-
-    results['cost_history'] = cost_history
-    results['penalty_history'] = penalty_history
-    results['utilization_history'] = utilization_history
-    results['capacity_violation_history'] = capacity_violation_history
-
-    # Add additional plotting data
-    results['plotting_data'] = {
-        'generations': list(range(1, len(results['fitness_history']) + 1)),
-        'execution_timeline': {
-            'generation_times': results['generation_times'],
-            'cumulative_times': [sum(results['generation_times'][:i+1]) for i in range(len(results['generation_times']))],
-            'time_per_generation': [results['generation_times'][i] - (results['generation_times'][i-1] if i > 0 else 0) for i in range(len(results['generation_times']))]
-        },
-        'performance_metrics': {
-            'fitness_improvement': [(results['fitness_history'][i] - results['fitness_history'][0]) for i in range(len(results['fitness_history']))],
-            'cost_reduction': [(cost_history[0] - cost_history[i]) for i in range(len(cost_history))],
-            'convergence_rate': results['convergence_history']
-        },
-        'solution_quality': {
-            'best_fitness_per_generation': results['fitness_history'],
-            'average_fitness_per_generation': results['average_fitness_history'],
-            'population_diversity_per_generation': results['population_diversity_history'],
-            'network_utilization_per_generation': utilization_history,
-            'capacity_violations_per_generation': capacity_violation_history
-        }
-    }
-
-    return results
-
 
 if __name__ == "__main__":
-    results = main()
+    main()
