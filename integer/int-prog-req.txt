@@ -1,2 +1,0 @@
-matplotlib==3.10.3
-pulp==3.2.1

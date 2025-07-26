@@ -5,11 +5,9 @@ import numpy as np
 import sys
 import os
 
-from result import ResultIP
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-network_module = importlib.import_module('network')
-NetworkGraph = network_module.NetworkGraph
+# this import works when this code is run from root directory
+from types.result import ResultIP
+from types.network import NetworkGraph
 
 
 def run_integer_programming(nodes_file="nodes.txt", links_file="links.txt", demands_file="demands.txt", time_limit=None, mip_gap=0.3, msg=True):

@@ -9,42 +9,15 @@ Usage:
     python main.py [genetic|ip|both]
 """
 
-import sys
-import os
-import matplotlib.pyplot as plt
-import numpy as np
+# Import: libraries
 import concurrent.futures
 
-from result import ResultGA, ResultIP
-
-# Clean imports using wrapper modules
-from genetic.genetic_algorithm import run_genetic_algorithm
-from integer.integer_programming import run_integer_programming
-
-
-type algorithm_type = "GA" | "IP"
-type algorithm_choice = "GA" | "IP" | "both"
-algorithm_name = {"GA": "Genetic Algorithm", "IP": "Integer Programming"}
-
-
-def print_summary(algorithm: algorithm_type, results: ResultGA | ResultIP):
-    """Print optimization summary for ResultGA or ResultIP objects."""
-
-    print(f"\n{'='*60}")
-    print(f"{algorithm_name[algorithm]} OPTIMIZATION RESULTS")
-    print(f"{'='*60}")
-
-    if algorithm == "GA":
-        print(f"Total Runtime: {results.total_runtime:.2f} seconds")
-        print(f"Total Cost: ${results.total_cost:,.2f}")
-
-    elif algorithm == "IP":
-        print(f"Total Runtime: {results.total_runtime:.2f} seconds")
-        print(f"Total Cost: ${results.total_cost:,.2f}")
-
-    else:
-        print("[Warning] Unknown result type. No details to show.")
-
+# Import: types, utilities, algorithms
+from types.result import ResultGA, ResultIP
+from types.algorithms import algorithm_choice
+from utilities.printing import print_summary
+from algorithms.genetic_algorithm import run_genetic_algorithm
+from algorithms.integer_programming import run_integer_programming
 
 def genetic_algorithm() -> ResultGA:
     return run_genetic_algorithm(
@@ -55,14 +28,16 @@ def genetic_algorithm() -> ResultGA:
         msg=False
     )
 
-
 def integer_programming() -> ResultIP:
     return run_integer_programming()
 
+"""
+===================================================
+ Main Function
+===================================================
+"""
 
 def main(algorithm: algorithm_choice = "both"):
-    """Main function to run optimization algorit hms."""
-    
     if algorithm == "GA":
         print("Running Genetic Algorithm...")
         results = genetic_algorithm()
@@ -73,7 +48,7 @@ def main(algorithm: algorithm_choice = "both"):
         results = integer_programming()
         print_summary("IP", results)
 
-    else:  # both
+    else:
         print("Running Both Algorithms in Parallel...")
 
         # Use ThreadPoolExecutor to run both algorithms concurrently
@@ -91,11 +66,11 @@ def main(algorithm: algorithm_choice = "both"):
 
             # Wait for results
             print("\n⏳ Waiting for algorithms to complete...")
-            ga_results = ga_future.result()
-            ip_results = ip_future.result()
+            ga_results: ResultGA = ga_future.result()
+            ip_results: ResultIP = ip_future.result()
 
         print_summary("GA", ga_results)
         print_summary("IP", ip_results)
 
 if __name__ == "__main__":
-    main("both")  # Default to both algorithms
+    main("both")

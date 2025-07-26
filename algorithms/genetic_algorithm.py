@@ -1,14 +1,10 @@
-import importlib
-import os
-import sys
 import time
 import numpy as np
 import pygad
-from result import ResultGA
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-network_module = importlib.import_module('network')
-NetworkGraph = network_module.NetworkGraph
+# this import works when this code is run from root directory
+from types.network import NetworkGraph
+from types.result import ResultGA
 
 class GeneticAlgorithmOptimizerSimple:
     """Minimal Genetic Algorithm for network optimization (no history, only cost/runtime)"""
@@ -117,16 +113,4 @@ def run_genetic_algorithm_simple(nodes_file="nodes.txt", links_file="links.txt",
         num_generations=num_generations,
         sol_per_pop=sol_per_pop,
         num_parents_mating=num_parents_mating
-    )
-
-if __name__ == "__main__":
-    run_genetic_algorithm_simple(
-        nodes_file="nodes.txt",
-        links_file="links.txt",
-        demands_file="demands.txt",
-        num_generations=50,
-        sol_per_pop=50,
-        num_parents_mating=20,
-        time_limit=10,
-        msg=True,
     )

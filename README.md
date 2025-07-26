@@ -9,10 +9,15 @@ This project applies advanced optimization techniques to solve a real-world netw
 
 <https://sndlib.put.poznan.pl/home.action>
 
-# TODO
 
-- Problem Description
-- Integer Programming Problem Description
-- Integer Programming Implementation, Solution & Runtime
-- Genetic Algorithm Problem Descritpion
-- Genetic Algorithm Implementation, Solution & Runtime
+# Usage Inscructions
+
+> run main.py with the following folder hierarchy for correct "import" usage
+>```
+> src/
+> ├── main.py
+> ├── algorithms/
+> ├── inputs/
+> ├── types/
+> ├── utilities/
+> ```

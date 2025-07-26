@@ -1,4 +1,9 @@
-"""This module defines the data structures used to store results from the optimization algorithms."""
+"""
+Data structures for results of optimization algorithms.
+
+types: ResultGA, ResultIP
+"""
+
 from dataclasses import dataclass, field
 from typing import List, Optional, Any
 
