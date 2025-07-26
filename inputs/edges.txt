@@ -1,4 +1,4 @@
-<link_id> ( <source> <target> ) <pre_installed_capacity> <pre_installed_capacity_cost> <routing_cost> <setup_cost> ( {<module_capacity> <module_cost>}* )
+<edge_id> ( <source> <target> ) <pre_installed_capacity> <pre_installed_capacity_cost> <routing_cost> <setup_cost> ( {<module_capacity> <module_cost>}* )
 L1 ( Amsterdam Brussels ) 0.00 0.00 2.59 0.00 ( 7560.00 23310.00 30240.00 69930.00 120960.00 209790.00 )
 L2 ( Amsterdam Glasgow ) 0.00 0.00 10.67 0.00 ( 7560.00 96030.00 30240.00 288090.00 120960.00 864270.00 )
 L3 ( Amsterdam Hamburg ) 0.00 0.00 5.52 0.00 ( 7560.00 49680.00 30240.00 149040.00 120960.00 447120.00 )

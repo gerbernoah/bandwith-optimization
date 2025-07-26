@@ -1,129 +1,104 @@
 import gurobipy as gp
 from gurobipy import GRB
-import importlib
-import numpy as np
-import sys
-import os
+from typing import List, Dict, Tuple
+from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
+from types2.result import ResultIP
 
-# this import works when this code is run from root directory
-from types.result import ResultIP
-from types.network import NetworkGraph
+def create_model(network: Network) -> gp.Model:
+    nodes, node_dict, edges, uedges, uedge_to_edge, demands = network.unpack()
 
-
-def run_integer_programming(nodes_file="nodes.txt", links_file="links.txt", demands_file="demands.txt", time_limit=None, mip_gap=0.3, msg=True):
     """
-    Run integer programming optimization using Gurobi (no PuLP).
-    Args:
-        nodes_file: Path to nodes file
-        links_file: Path to links file
-        demands_file: Path to demands file
-        time_limit: Maximum time in seconds (None for no limit)
-        mip_gap: Relative MIP gap (default 0.3 = 30%)
-        msg: Whether to show solver messages
-    Returns:
-        dict: Contains optimization results
+    ==================================================
+        MODEL INITIALIZATION
+    ==================================================
     """
-    # Load network
-    network = NetworkGraph()
-    network.load_from_files(nodes_file, links_file, demands_file)
 
-    nodeids = {node_id: i for i, node_id in enumerate(network.nodes.keys())}
-    V = list(range(len(network.nodes)))
-    link_ids = list(network.links.keys())
-    # Directed edges
-    E = {}
-    for link_id, link in network.links.items():
-        src_idx = nodeids[link.source]
-        tgt_idx = nodeids[link.target]
-        E[f"{link_id}_fwd"] = (src_idx, tgt_idx, link.routing_cost)
-        E[f"{link_id}_rev"] = (tgt_idx, src_idx, link.routing_cost)
-    # Modules
-    M = {link_id: link.get_total_capacity_options() for link_id, link in network.links.items()}
-    # Demands
-    D = []
-    for demand_id, demand in network.demands.items():
-        src_idx = nodeids[demand.source]
-        tgt_idx = nodeids[demand.target]
-        D.append((src_idx, tgt_idx, demand.demand_value))
-
+    # create gurubipy model
     model = gp.Model("NetworkDesign")
-    if not msg:
-        model.setParam('OutputFlag', 0)
-    if time_limit:
-        model.setParam('TimeLimit', time_limit)
-    if mip_gap:
-        model.setParam('MIPGap', mip_gap)
 
-    # Variables
-    x = {}  # flow variables: x[e,s,t]
-    for e in E:
-        for s, t, dval in D:
-            x[e, s, t] = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name=f"x_{e}_{s}_{t}")
-    y = {}  # module install: y[edge, m]
-    for link_id in M:
-        for m, (cap, cost) in enumerate(M[link_id]):
-            y[link_id, m] = model.addVar(vtype=GRB.BINARY, name=f"y_{link_id}_{m}")
+    """
+    ==================================================
+        VARIABLE CREATION
+    ==================================================
+    """
 
-    model.update()
+    # Flow Variables: x[d, e]
+    # where d = demand ID, e = directed edge ID
+    x = {}
+    for demand in demands:
+        for edge in edges:
+            x[demand.id, edge.id] = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name=f"x_{demand.id}_{edge.id}")
 
-    # Objective: routing cost + module cost
-    routing_cost = gp.quicksum(x[e, s, t] * E[e][2] for e in E for s, t, _ in D)
-    module_cost = gp.quicksum(y[link_id, m] * M[link_id][m][1] for link_id in M for m in range(len(M[link_id])))
+    # Module installation Variables: y[ue, i]
+    # where ue = undirected edge ID, i = module index in the Module list of the edge
+    y = {}
+    for uedge in uedges:
+        for module in uedge.module_options:
+            y[uedge.id, module.index] = model.addVar(vtype=GRB.BINARY, name=f"y_{uedge.id}_{module.index}")
+
+    """
+    ==================================================
+        OBJECTIVE FUNCTION
+    ==================================================
+    """
+    routing_cost = gp.quicksum(x[d.id, e.id] * e.uEdge.routing_cost for d in demands for e in edges)
+    module_cost = gp.quicksum(y[ue.id, m.index] * m.cost for ue in uedges for m in ue.module_options)
     model.setObjective(routing_cost + module_cost, GRB.MINIMIZE)
 
-    # Flow conservation
-    for s, t, dval in D:
-        for v in V:
-            inflow = gp.quicksum(x[e, s, t] for e in E if E[e][1] == v)
-            outflow = gp.quicksum(x[e, s, t] for e in E if E[e][0] == v)
-            if v == s:
-                model.addConstr(outflow - inflow == dval, name=f"flow_src_{s}_{t}_{v}")
-            elif v == t:
-                model.addConstr(inflow - outflow == dval, name=f"flow_tgt_{s}_{t}_{v}")
+    """
+    ==================================================
+        CONSTRAINTS
+    ==================================================
+    """
+
+    # Flow Conservation (on each node) per Demand
+    for demand in demands:
+        for node in nodes:
+            inflow = gp.quicksum(x[demand.id, e.id] for e in edges if e.target.id == node.id)
+            outflow = gp.quicksum(x[demand.id, e.id] for e in edges if e.source.id == node.id)
+
+            if node.id == demand.source.id:
+                model.addConstr(outflow - inflow == demand.value, name=f"flow_src_{demand.id}_{node.id}")
+            elif node.id == demand.target.id:
+                model.addConstr(inflow - outflow == demand.value, name=f"flow_tgt_{demand.id}_{node.id}")
             else:
-                model.addConstr(inflow == outflow, name=f"flow_bal_{s}_{t}_{v}")
+                model.addConstr(inflow == outflow, name=f"flow_bal_{demand.id}_{node.id}")
 
-    # Capacity constraints (sum of flows in both directions <= installed capacity)
-    for link_id in M:
-        total_flow = gp.quicksum(x[f"{link_id}_fwd", s, t] + x[f"{link_id}_rev", s, t] for s, t, _ in D)
-        total_cap = gp.quicksum(y[link_id, m] * M[link_id][m][0] for m in range(len(M[link_id])))
-        model.addConstr(total_flow <= total_cap, name=f"cap_{link_id}")
+    # Capacity Constraint per Undirected Edge
+    for uedge in uedges:
+        e1, e2 = uedge_to_edge[uedge.id]
+        flow = gp.quicksum(x[d.id, e1.id] + x[d.id, e2.id] for d in demands)
+        capacity = gp.quicksum(y[uedge.id, m.index] * m.capacity for m in uedge.module_options)
 
-    # One module per edge
-    for link_id in M:
-        model.addConstr(gp.quicksum(y[link_id, m] for m in range(len(M[link_id]))) == 1, name=f"one_module_{link_id}")
+        model.addConstr(flow <= capacity, name=f"cap_{uedge.id}")
 
+    # One Module Constraint per Undirected Edge
+    for uedge in uedges:
+        module_count = gp.quicksum(y[uedge.id, m.index] for m in uedge.module_options)
+
+        model.addConstr(module_count <= 1, name=f"one_module_{uedge.id}")
+
+    return model
+
+"""
+==================================================
+    RUN OPTIMIZATION
+==================================================
+"""
+
+def run_IP(network: Network):
+    model = create_model(network)
     model.optimize()
 
     status = model.Status
     total_cost = float('inf')
+
     if status in [GRB.OPTIMAL, GRB.TIME_LIMIT, GRB.SUBOPTIMAL]:
         total_cost = model.ObjVal
+
     total_runtime = model.Runtime
-    
+
     return ResultIP(
         total_runtime=total_runtime,
         total_cost=total_cost
     )
-
-
-def main():
-    print("Running Integer Programming Optimization with Gurobi...")
-    results = run_integer_programming(
-        nodes_file="../nodes.txt",
-        links_file="../links.txt",
-        demands_file="../demands.txt",
-        time_limit=20,  # seconds
-        mip_gap=0.3,
-        msg=True
-    )
-    print(f"\nOptimization Results:")
-    print(f"Status: {results['status']}")
-    print(f"Total time: {results['total_time']:.2f} seconds")
-    print(f"Best objective: {results['best_fitness']}")
-    print(f"Best solution: {results['best_solution']}")
-    return results
-
-
-if __name__ == "__main__":
-    main()

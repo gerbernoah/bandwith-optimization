@@ -21,3 +21,6 @@ This project applies advanced optimization techniques to solve a real-world netw
 > ├── types/
 > ├── utilities/
 > ```
+
+- run `utilities.parsing.parse_network()` to parse all input data: returns `Network`
+- run `algorithms.integer_programming.run_IP(Network)` to optimize network: returns `ResultIP`

@@ -3,13 +3,13 @@ import numpy as np
 import pygad
 
 # this import works when this code is run from root directory
-from types.network import NetworkGraph
-from types.result import ResultGA
+from types2.network import Network
+from types2.result import ResultGA
 
 class GeneticAlgorithmOptimizerSimple:
     """Minimal Genetic Algorithm for network optimization (no history, only cost/runtime)"""
 
-    def __init__(self, network: NetworkGraph, time_limit=None, msg=False):
+    def __init__(self, network: Network, time_limit=None, msg=False):
         self.network = network
         self.link_ids = list(network.links.keys())
         self.num_genes = len(self.link_ids)

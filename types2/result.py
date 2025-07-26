@@ -4,8 +4,7 @@ Data structures for results of optimization algorithms.
 types: ResultGA, ResultIP
 """
 
-from dataclasses import dataclass, field
-from typing import List, Optional, Any
+from dataclasses import dataclass
 
 @dataclass
 class ResultGA:

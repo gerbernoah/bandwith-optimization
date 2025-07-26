@@ -4,7 +4,8 @@ Functions for printing optimization results.
 functions: print_summary
 """
 # this works when this code is run from root directory
-from types.algorithms import algorithm_type
+from types2.algorithms import algorithm_type
+from types2.result import ResultGA, ResultIP
 
 algorithm_name = {"GA": "Genetic Algorithm", "IP": "Integer Programming"}
 
