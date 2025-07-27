@@ -1,8 +1,11 @@
 import gurobipy as gp
 from gurobipy import GRB
 from typing import List, Dict, Tuple
+
+# Data Structures & Utilities
 from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
 from types2.result import ResultIP
+from utilities.printing import print_title
 
 def create_model(network: Network) -> gp.Model:
     nodes, node_dict, edges, uedges, uedge_to_edge, demands = network.unpack()
@@ -86,8 +89,25 @@ def create_model(network: Network) -> gp.Model:
 ==================================================
 """
 
-def run_IP(network: Network):
+def run_IP(
+        network: Network,
+        log = True,
+        timeLimit = 5*60,
+        gapLimit = 0.1
+    ):
+    """
+    Args:
+    - log: whether Gurubi should print information while processing
+    - timeLimit: timeLimit for the Integer Program
+    - gapLimit: gap limit for the Integer Program
+    """
+    print_title("INTEGER PROGRAMMING")
+    print("=== LOGGING ON ===" if log else "=== LOGGING OFF ===")
+
     model = create_model(network)
+    model.setParam('OutputFlag', (1 if log else 0))
+    model.setParam("TimeLimit", timeLimit)
+    model.setParam("MIPGap", gapLimit)
     model.optimize()
 
     status = model.Status

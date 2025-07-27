@@ -5,15 +5,22 @@ import copy
 import networkx as nx
 from itertools import islice
 from typing import List, Tuple
+import time
 
-# Import your data structures
+# Data Structures & Utilities
 from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
 from types2.biology import GAIndividual, Path, Paths5, DemandPaths
-from utilities.parsing import parse_network  # Import your parsing function
+from types2.result import ResultGA
+from utilities.printing import print_title
 
 # Global variables for GA
-penalty_coeff = 1000.0
 global_demand_paths: DemandPaths = []  # Will store precomputed paths
+
+"""
+==================================================
+    PRECOMPUTATION (demand paths)
+==================================================
+"""
 
 def precompute_demand_paths(network: Network) -> DemandPaths:
     """Precompute 5 shortest paths for each demand based on routing cost"""
@@ -54,6 +61,12 @@ def precompute_demand_paths(network: Network) -> DemandPaths:
         demand_paths.append(edge_paths)
     
     return demand_paths
+
+"""
+==================================================
+    MODEL FUNCTIONS
+==================================================
+"""
 
 def create_individual(uedges, demands) -> GAIndividual:
     """Create a GA individual with fitness attribute"""
@@ -156,14 +169,14 @@ def evaluate_individual(individual: GAIndividual, network: Network, penalty_coef
     
     return (total_cost,)
 
-def setup_toolbox(network: Network):
+def setup_toolbox(network: Network, penalty_coeff):
     """Setup DEAP toolbox with network-specific parameters"""
     _, _, _, uedges, _, demands = network.unpack()
     
     # DEAP setup with typed individual
     toolbox = base.Toolbox()
     toolbox.register("individual", lambda: create_individual(uedges, demands))
-    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual) # type: ignore
     toolbox.register("mate", cx_uniform)
     toolbox.register("mutate", mut_custom, indpb=0.1, uedges=uedges)
     toolbox.register("select", tools.selTournament, tournsize=3)
@@ -171,30 +184,72 @@ def setup_toolbox(network: Network):
     
     return toolbox
 
-def main():
+"""
+==================================================
+    RUN GENETIC ALGORITHM
+==================================================
+"""
+
+def run_GA(
+        network: Network,
+        npop = 200,
+        cxpb = 0.7,
+        mutpb = 0.4,
+        ngen = 200,
+        penalty_coeff = 1000.0,
+        log = True,
+    ):
+    """
+    Args:
+    - network: input data parsed as Network
+    - npop: initial population size
+    - cxpb: cross over probability
+    - mutpb: mutation probability
+    - ngen: number of generations
+    - log: whether stats should be printed
+    """
+    print_title("GENETIC ALGORITHM")
+    print("=== LOGGING ON ===" if log else "=== LOGGING OFF ===")
+
+    """
+    ==================================================
+        SETUP & RUN
+    ==================================================
+    """
+
     # Parse network and precompute paths
-    network = parse_network()
     global global_demand_paths
     global_demand_paths = precompute_demand_paths(network)
     
     # Setup GA
-    toolbox = setup_toolbox(network)
+    toolbox = setup_toolbox(network, penalty_coeff)
     _, _, _, uedges, _, demands = network.unpack()
     
     # Run GA
     random.seed(42)
-    pop = toolbox.population(n=200)
+    pop = toolbox.population(n=npop) # type: ignore
     hof = tools.HallOfFame(1)
     
     # Statistics setup
     stats = tools.Statistics(lambda ind: ind.fitness.values[0])
     stats.register("min", np.min)
     stats.register("avg", np.mean)
+
+    startTime = time.perf_counter()
     
     pop, log = algorithms.eaSimple(
-        pop, toolbox, cxpb=0.7, mutpb=0.4, ngen=500,
-        stats=stats, halloffame=hof, verbose=True
+        pop, toolbox, cxpb=cxpb, mutpb=mutpb, ngen=ngen,
+        stats=stats, halloffame=hof, verbose=log
     )
+
+    endTime = time.perf_counter()
+    runtime = endTime - startTime
+
+    """
+    ==================================================
+        DISPLAY FLOW & VIOLATIONS
+    ==================================================
+    """
     
     # Display results
     best_ind = hof[0]
@@ -203,16 +258,15 @@ def main():
     
     # Detailed capacity utilization report
     _, _, edges, uedges, _, _ = network.unpack()
-    module_sel, flow_fracs = best_ind[0], best_ind[1]
+    module_sel, flow_fracs = best_ind.module_selections, best_ind.flow_fractions
     
     # Recalculate flows
     directed_edge_flows = [0.0] * len(edges)
     for j, demand in enumerate(demands):
         for path_idx in range(5):
             flow_val = flow_fracs[j][path_idx] * demand.value
-            for edge_id in global_demand_paths[j][path_idx]:
-                if edge_id < len(directed_edge_flows):
-                    directed_edge_flows[edge_id] += flow_val
+            for edge in global_demand_paths[j][path_idx]:
+                directed_edge_flows[edge.id] += flow_val
     
     uedge_flows = [0.0] * len(uedges)
     for edge in edges:
@@ -232,7 +286,7 @@ def main():
         print(f"UEdge {i}: Flow={flow:.2f}/{capacity} ", 
               f"(Violation: {violation:.2f})" if violation > 0 else "")
     
-    return best_ind, log
-
-if __name__ == "__main__":
-    best_individual, logbook = main()
+    return ResultGA(
+        total_runtime = runtime,
+        total_cost = best_ind.fitness.values[0]
+    )

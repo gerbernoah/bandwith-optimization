@@ -24,3 +24,12 @@ This project applies advanced optimization techniques to solve a real-world netw
 
 - run `utilities.parsing.parse_network()` to parse all input data: returns `Network`
 - run `algorithms.integer_programming.run_IP(Network)` to optimize network: returns `ResultIP`
+- run `algorithms.genetic_algorithm.run_GA(Network)` to optimize network: returns `ResultGA`
+
+# QUICK NOTES
+
+- both IP and GA seem to be working
+- GA seems to be worse than IP right now
+- GA needs to be optimized
+- RUNTIMES of both algorithms are still needed
+- GA code still has some hardcoded values, like 5 shortest paths per demand, or the parameters like population count, nr of generations

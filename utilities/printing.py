@@ -9,13 +9,14 @@ from types2.result import ResultGA, ResultIP
 
 algorithm_name = {"GA": "Genetic Algorithm", "IP": "Integer Programming"}
 
+def print_title(title: str):
+    l = f"\n{'='*60}"
+    print(f"{l}\n{title}{l}")
+
 def print_summary(algorithm: algorithm_type, results: ResultGA | ResultIP):
     """Print optimization summary for ResultGA or ResultIP objects."""
 
-    # Title
-    print(f"\n{'='*60}")
-    print(f"{algorithm_name[algorithm]} OPTIMIZATION RESULTS")
-    print(f"{'='*60}")
+    print_title(f"{algorithm_name[algorithm]} OPTIMIZATION RESULTS")
 
     if algorithm == "GA":
         print(f"Total Runtime: {results.total_runtime:.2f} seconds")
