@@ -97,7 +97,7 @@ def parse_edges(node_dict: NodeDict) -> Tuple[List[Edge], List[UEdge], UEdgeToEd
         source, target, route_cost = match.group(2, 3, 6)
         modules_raw = match.group(8)
         moduleGroups = re.findall(r"(\d+\.\d+)\s+(\d+\.\d+)", modules_raw) # Extract modules from string of group 8
-        modules: List[Module] = [Module(capacity=cap, cost=cost, index=index) for index, (cap, cost) in enumerate(moduleGroups)]
+        modules: List[Module] = [Module(capacity=float(cap), cost=float(cost), index=index) for index, (cap, cost) in enumerate(moduleGroups)]
 
         # create undirected UEdge and two directed Edge objects
         uEdge = UEdge(routing_cost=float(route_cost), module_options=modules)

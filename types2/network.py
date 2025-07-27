@@ -57,8 +57,8 @@ class UEdge:
 
     # assign unique ID to each node after Edge is created
     def __post_init__(self):
-        self.id = Edge._id_counter
-        Edge._id_counter += 1
+        self.id = UEdge._id_counter
+        UEdge._id_counter += 1
 
 @dataclass
 class Edge:

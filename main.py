@@ -7,3 +7,7 @@ network = parse_network()
 results = run_IP(network)
 
 print_summary("IP", results)
+
+# from algorithms.genetic_algorithm import *
+
+# main()

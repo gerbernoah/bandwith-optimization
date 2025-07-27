@@ -1,116 +1,238 @@
-import time
+import random
 import numpy as np
-import pygad
+from deap import base, creator, tools, algorithms
+import copy
+import networkx as nx
+from itertools import islice
+from typing import List, Tuple
 
-# this import works when this code is run from root directory
-from types2.network import Network
-from types2.result import ResultGA
+# Import your data structures
+from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
+from types2.biology import GAIndividual, Path, Paths5, DemandPaths
+from utilities.parsing import parse_network  # Import your parsing function
 
-class GeneticAlgorithmOptimizerSimple:
-    """Minimal Genetic Algorithm for network optimization (no history, only cost/runtime)"""
+# Global variables for GA
+penalty_coeff = 1000.0
+global_demand_paths: DemandPaths = []  # Will store precomputed paths
 
-    def __init__(self, network: Network, time_limit=None, msg=False):
-        self.network = network
-        self.link_ids = list(network.links.keys())
-        self.num_genes = len(self.link_ids)
-        self.time_limit = time_limit
-        self.start_time = None
-        self.timeout_occurred = False
-        self.msg = msg
-
-    def create_initial_population(self, sol_per_pop: int) -> np.ndarray:
-        population = []
-        for _ in range(sol_per_pop):
-            solution = []
-            for link_id in self.link_ids:
-                link = self.network.links[link_id]
-                num_options = len(link.get_total_capacity_options())
-                choice = np.random.randint(0, num_options)
-                solution.append(choice)
-            population.append(solution)
-        return np.array(population)
-
-    def fitness_function(self, ga_instance, solution, solution_idx):
-        total_cost = 0.0
-        penalty = 0.0
-        for i, link_id in enumerate(self.link_ids):
-            link = self.network.links[link_id]
-            module_choice = int(solution[i])
-            capacity_options = link.get_total_capacity_options()
-            if module_choice < len(capacity_options):
-                capacity, cost = capacity_options[module_choice]
-                total_cost += cost
-                demand = self._get_link_demand(link_id)
-                if demand > capacity:
-                    penalty += (demand - capacity) * 1e9
-            else:
-                penalty += 1e10
-        baseline = 1e8
-        fitness = baseline - total_cost - penalty
-        return fitness
-
-    def _get_link_demand(self, link_id: str) -> float:
-        link = self.network.links[link_id]
-        demand = 0.0
-        for demand_obj in self.network.demands.values():
-            if (demand_obj.source == link.source and demand_obj.target == link.target) or \
-               (demand_obj.source == link.target and demand_obj.target == link.source):
-                demand += demand_obj.demand_value
-        return demand
-
-    def optimize(self, num_generations=100, sol_per_pop=50, num_parents_mating=25):
-        self.start_time = time.time()
-        self.timeout_occurred = False
-        initial_population = self.create_initial_population(sol_per_pop)
-        gene_space = []
-        for link_id in self.link_ids:
-            link = self.network.links[link_id]
-            num_options = len(link.get_total_capacity_options())
-            gene_space.append(list(range(num_options)))
-        ga_instance = pygad.GA(
-            num_generations=num_generations,
-            num_parents_mating=num_parents_mating,
-            fitness_func=self.fitness_function,
-            sol_per_pop=sol_per_pop,
-            num_genes=self.num_genes,
-            initial_population=initial_population,
-            gene_space=gene_space,
-            parent_selection_type="sss",
-            keep_parents=1,
-            crossover_type="single_point",
-            mutation_type="random",
-            mutation_percent_genes=10
-        )
+def precompute_demand_paths(network: Network) -> DemandPaths:
+    """Precompute 5 shortest paths for each demand based on routing cost"""
+    _, _, edges, uedges, _, demands = network.unpack()
+    
+    # Build directed graph
+    G = nx.DiGraph()
+    for edge in edges:
+        G.add_edge(edge.source.id, edge.target.id, 
+                   weight=edge.uEdge.routing_cost, 
+                   edge_id=edge.id)
+    
+    demand_paths: DemandPaths = []
+    for demand in demands:
+        source_id = demand.source.id
+        target_id = demand.target.id
+        
         try:
-            ga_instance.run()
-        except (KeyboardInterrupt, TimeoutError):
-            self.timeout_occurred = True
-        solution, solution_fitness, solution_idx = ga_instance.best_solution()
-        total_time = time.time() - self.start_time if self.start_time else 0
-        actual_cost = self.get_solution_cost(solution)
-        return ResultGA(
-            total_runtime=total_time,
-            total_cost=actual_cost
-        )
+            # Compute up to 5 shortest paths
+            paths = list(islice(nx.shortest_simple_paths(G, source_id, target_id, weight='weight'), 5))
+        except (nx.NetworkXNoPath, nx.NetworkXError):
+            paths = []
+        
+        # Convert node paths to edge ID paths
+        edge_paths: List[Path] = []
+        for path in paths:
+            edge_ids = []
+            for i in range(len(path)-1):
+                u, v = path[i], path[i+1]
+                edge_id = G[u][v]['edge_id']
+                edge_ids.append(edge_id)
+            edge_paths.append([edges[id] for id in edge_ids])
+        
+        # Pad with empty paths if fewer than 5
+        while len(edge_paths) < 5:
+            edge_paths.append([])
+        
+        demand_paths.append(edge_paths)
+    
+    return demand_paths
 
-    def get_solution_cost(self, solution):
-        total_cost = 0.0
-        for i, link_id in enumerate(self.link_ids):
-            link = self.network.links[link_id]
-            module_choice = int(solution[i])
-            capacity_options = link.get_total_capacity_options()
-            if module_choice < len(capacity_options):
-                _, cost = capacity_options[module_choice]
-                total_cost += cost
-        return total_cost
-
-def run_genetic_algorithm_simple(nodes_file="nodes.txt", links_file="links.txt", demands_file="demands.txt",
-                                 num_generations=50, sol_per_pop=50, num_parents_mating=20, time_limit=None, msg=False):
-    network = NetworkGraph()
-    network.load_from_files(nodes_file, links_file, demands_file)
-    optimizer = GeneticAlgorithmOptimizerSimple(network, time_limit=time_limit, msg=msg)
-    return optimizer.optimize(
-        num_generations=num_generations,
-        sol_per_pop=sol_per_pop,
-        num_parents_mating=num_parents_mating
+def create_individual(uedges, demands) -> GAIndividual:
+    """Create a GA individual with fitness attribute"""
+    # Module part: for each undirected edge
+    module_selections = []
+    for uedge in uedges:
+        choices = [-1] + list(range(len(uedge.module_options)))
+        module_selections.append(random.choice(choices))
+    
+    # Flow part: for each demand
+    flow_fractions = []
+    for _ in range(len(demands)):
+        fracs = np.random.dirichlet(np.ones(5), size=1)[0].tolist()
+        flow_fractions.append(fracs)
+    
+    return GAIndividual(
+        module_selections=module_selections,
+        flow_fractions=flow_fractions
     )
+
+def cx_uniform(ind1: GAIndividual, ind2: GAIndividual) -> Tuple[GAIndividual, GAIndividual]:
+    """Uniform crossover operator"""
+    # Module crossover
+    mod1 = copy.deepcopy(ind1.module_selections)
+    mod2 = copy.deepcopy(ind2.module_selections)
+    for i in range(len(mod1)):
+        if random.random() < 0.5:
+            mod1[i], mod2[i] = mod2[i], mod1[i]
+    
+    # Flow crossover
+    flow1 = copy.deepcopy(ind1.flow_fractions)
+    flow2 = copy.deepcopy(ind2.flow_fractions)
+    for j in range(len(flow1)):
+        if random.random() < 0.5:
+            flow1[j], flow2[j] = flow2[j], flow1[j]
+    
+    return (
+        GAIndividual(module_selections=mod1, flow_fractions=flow1),
+        GAIndividual(module_selections=mod2, flow_fractions=flow2)
+    )
+
+def mut_custom(individual: GAIndividual, indpb: float, uedges) -> Tuple[GAIndividual]:
+    """Mutation operator that returns a tuple for DEAP compatibility"""
+    # Mutate module selections
+    for i in range(len(individual.module_selections)):
+        if random.random() < indpb:
+            choices = [-1] + list(range(len(uedges[i].module_options)))
+            individual.module_selections[i] = random.choice(choices)
+    
+    # Mutate flow distributions
+    for j in range(len(individual.flow_fractions)):
+        if random.random() < indpb:
+            new_fracs = np.random.dirichlet(np.ones(5), size=1)[0].tolist()
+            individual.flow_fractions[j] = new_fracs
+    
+    return (individual,)  # Return as tuple
+
+def evaluate_individual(individual: GAIndividual, network: Network, penalty_coeff: float) -> Tuple[float]:
+    """Evaluate fitness using network data"""
+    # Unpack network components
+    nodes, node_dict, edges, uedges, uedge_to_edge, demands = network.unpack()
+    total_cost = 0.0
+    
+    # 1. Calculate setup costs
+    for i, uedge in enumerate(uedges):
+        mod_idx = individual.module_selections[i]
+        if mod_idx != -1:
+            total_cost += uedge.module_options[mod_idx].cost
+    
+    # 2. Initialize edge flows
+    directed_edge_flows = [0.0] * len(edges)
+    
+    # 3. Calculate flows per demand
+    for j, demand in enumerate(demands):
+        for path_idx in range(5):
+            flow_val = individual.flow_fractions[j][path_idx] * demand.value
+            for edge in global_demand_paths[j][path_idx]:
+                directed_edge_flows[edge.id] += flow_val
+    
+    # 4. Aggregate flows to undirected edges
+    uedge_flows = [0.0] * len(uedges)
+    for edge in edges:
+        uedge_flows[edge.uEdge.id] += directed_edge_flows[edge.id]
+    
+    # 5. Calculate routing costs and penalties
+    routing_cost = 0.0
+    for edge in edges:
+        routing_cost += directed_edge_flows[edge.id] * edge.uEdge.routing_cost
+    total_cost += routing_cost
+    
+    # 6. Check capacity constraints
+    for i, uedge in enumerate(uedges):
+        mod_idx = individual.module_selections[i]
+        capacity = 0
+        if mod_idx != -1:
+            capacity = uedge.module_options[mod_idx].capacity
+        
+        if uedge_flows[i] > capacity:
+            total_cost += penalty_coeff * (uedge_flows[i] - capacity)
+    
+    return (total_cost,)
+
+def setup_toolbox(network: Network):
+    """Setup DEAP toolbox with network-specific parameters"""
+    _, _, _, uedges, _, demands = network.unpack()
+    
+    # DEAP setup with typed individual
+    toolbox = base.Toolbox()
+    toolbox.register("individual", lambda: create_individual(uedges, demands))
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+    toolbox.register("mate", cx_uniform)
+    toolbox.register("mutate", mut_custom, indpb=0.1, uedges=uedges)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("evaluate", evaluate_individual, network=network, penalty_coeff=penalty_coeff)
+    
+    return toolbox
+
+def main():
+    # Parse network and precompute paths
+    network = parse_network()
+    global global_demand_paths
+    global_demand_paths = precompute_demand_paths(network)
+    
+    # Setup GA
+    toolbox = setup_toolbox(network)
+    _, _, _, uedges, _, demands = network.unpack()
+    
+    # Run GA
+    random.seed(42)
+    pop = toolbox.population(n=200)
+    hof = tools.HallOfFame(1)
+    
+    # Statistics setup
+    stats = tools.Statistics(lambda ind: ind.fitness.values[0])
+    stats.register("min", np.min)
+    stats.register("avg", np.mean)
+    
+    pop, log = algorithms.eaSimple(
+        pop, toolbox, cxpb=0.7, mutpb=0.4, ngen=500,
+        stats=stats, halloffame=hof, verbose=True
+    )
+    
+    # Display results
+    best_ind = hof[0]
+    print("\nBest solution found:")
+    print("Total cost:", best_ind.fitness.values[0])
+    
+    # Detailed capacity utilization report
+    _, _, edges, uedges, _, _ = network.unpack()
+    module_sel, flow_fracs = best_ind[0], best_ind[1]
+    
+    # Recalculate flows
+    directed_edge_flows = [0.0] * len(edges)
+    for j, demand in enumerate(demands):
+        for path_idx in range(5):
+            flow_val = flow_fracs[j][path_idx] * demand.value
+            for edge_id in global_demand_paths[j][path_idx]:
+                if edge_id < len(directed_edge_flows):
+                    directed_edge_flows[edge_id] += flow_val
+    
+    uedge_flows = [0.0] * len(uedges)
+    for edge in edges:
+        uedge_id = edge.uEdge.id
+        if uedge_id < len(uedge_flows):
+            uedge_flows[uedge_id] += directed_edge_flows[edge.id]
+    
+    print("\nEdge utilization:")
+    for i, uedge in enumerate(uedges):
+        mod_idx = module_sel[i]
+        capacity = 0
+        if mod_idx != -1:
+            capacity = uedge.module_options[mod_idx].capacity
+        
+        flow = uedge_flows[i]
+        violation = max(0, flow - capacity)
+        print(f"UEdge {i}: Flow={flow:.2f}/{capacity} ", 
+              f"(Violation: {violation:.2f})" if violation > 0 else "")
+    
+    return best_ind, log
+
+if __name__ == "__main__":
+    best_individual, logbook = main()
