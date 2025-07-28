@@ -17,3 +17,12 @@
 - Crossover Operator
 - Fitness Function
 - Main GA loop
+
+## Modifications
+
+#### Elitism & Special initialization
+- `deap.algorithms.eaMuPlusLambda` does elitism, meaning selects mu best individuals from offspring, and lambda best individuals from initial pop
+- initializing population with individuals that have some individuals with no penalties might be good
+
+#### Better Crossover
+- What if instead of doing crossover totally randomly, we create a random iteration over the demands (not from first to last always), and then evaluate one for one which flow distribution of the which parent would have lower cost (including penalties once overflow)

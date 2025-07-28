@@ -15,8 +15,8 @@ network = parse_network()
     INTEGER PROGRAMMING
 ==================================================
 """
-results = run_IP(network, timeLimit=10)
-print_summary("IP", results)
+# results = run_IP(network, timeLimit=10)
+# print_summary("IP", results)
 
 """
 ==================================================

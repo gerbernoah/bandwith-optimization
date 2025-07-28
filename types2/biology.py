@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import List, Tuple
 from types2.network import Edge
 from deap import base, creator
+from enum import Enum
 
 # Create DEAP fitness type first
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -25,7 +26,7 @@ class GAIndividual:
     """
     module_selections: List[int]
     flow_fractions: List[List[float]]
-    fitness: creator.FitnessMin = field(default_factory=lambda: creator.FitnessMin())
+    fitness: creator.FitnessMin = field(default_factory=lambda: creator.FitnessMin()) # type: ignore
 
     def __post_init__(self):
         """Validation remains valuable for debugging"""
@@ -37,6 +38,13 @@ class GAIndividual:
                 for i in range(len(fractions)):
                     fractions[i] /= total
 
+# types for the 5 shortest demand paths
 type Path = List[Edge]
 type Paths5 = List[Path]
 type DemandPaths = List[Paths5]
+
+# GA create_individual strategies
+class InitStrategy(Enum):
+    RANDOM = 1      # randomly create individuals
+    MIN_MODULE = 2  # take lowest capacity module
+    MAX_MODULE = 3  # take highest capacity module

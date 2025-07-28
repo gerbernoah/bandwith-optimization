@@ -9,7 +9,7 @@ import time
 
 # Data Structures & Utilities
 from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
-from types2.biology import GAIndividual, Path, Paths5, DemandPaths
+from types2.biology import GAIndividual, Path, Paths5, DemandPaths, InitStrategy
 from types2.result import ResultGA
 from utilities.printing import print_title
 
@@ -68,13 +68,29 @@ def precompute_demand_paths(network: Network) -> DemandPaths:
 ==================================================
 """
 
-def create_individual(uedges, demands) -> GAIndividual:
+def create_individual(uedges, demands, strategy: InitStrategy) -> GAIndividual:
     """Create a GA individual with fitness attribute"""
     # Module part: for each undirected edge
     module_selections = []
-    for uedge in uedges:
-        choices = [-1] + list(range(len(uedge.module_options)))
-        module_selections.append(random.choice(choices))
+
+    # randomly select modules
+    if strategy.name == "RANDOM":
+        for uedge in uedges:
+            choices = [-1] + list(range(len(uedge.module_options)))
+            module_selections.append(random.choice(choices))
+
+    # highest capacity modules only
+    elif strategy.name == "MAX_MODULE":
+        for uedge in uedges:
+            module_selections.append(len(uedge.module_options) - 1)
+    
+    # lowest capacity modules only
+    elif strategy.name == "MIN_MODULE":
+        for uedge in uedges:
+            module_selections.append(len(uedge.module_options) - 1)
+    
+    else:
+        raise Exception("What strategy?")
     
     # Flow part: for each demand
     flow_fractions = []
@@ -169,14 +185,36 @@ def evaluate_individual(individual: GAIndividual, network: Network, penalty_coef
     
     return (total_cost,)
 
-def setup_toolbox(network: Network, penalty_coeff):
-    """Setup DEAP toolbox with network-specific parameters"""
+def setup_toolbox(network: Network, penalty_coeff, max_module_ratio=0.3, min_module_ratio=0.2):
+    """
+    Setup DEAP toolbox with network-specific parameters
+    Args:
+    - max_module_ratio: initial population % with maximum capacity modules selected
+    - min_module_ratio: initial population % with minimal capacity modules selected
+    """
     _, _, _, uedges, _, demands = network.unpack()
     
     # DEAP setup with typed individual
     toolbox = base.Toolbox()
-    toolbox.register("individual", lambda: create_individual(uedges, demands))
-    toolbox.register("population", tools.initRepeat, list, toolbox.individual) # type: ignore
+    toolbox.register("individual_random", lambda: create_individual(uedges, demands, InitStrategy.RANDOM))
+    toolbox.register("individual_max_module", lambda: create_individual(uedges, demands, InitStrategy.MAX_MODULE))
+    toolbox.register("individual_min_module", lambda: create_individual(uedges, demands, InitStrategy.MIN_MODULE))
+
+    # Create population with mixed strategies
+    def init_population(n):
+        pop: List[GAIndividual] = []
+        # population distribution
+        n_max_module = int(n * max_module_ratio)
+        n_min_cost = int(n * 0.2)
+        n_random = n - n_max_module - n_min_cost
+        # create individuals
+        pop.extend(toolbox.individual_max_module() for _ in range(n_max_module)) # type: ignore
+        pop.extend(toolbox.individual_min_module() for _ in range(n_min_cost)) # type: ignore
+        pop.extend(toolbox.individual_random() for _ in range(n_random)) # type: ignore
+
+        return pop
+
+    toolbox.register("population", init_population) # type: ignore
     toolbox.register("mate", cx_uniform)
     toolbox.register("mutate", mut_custom, indpb=0.1, uedges=uedges)
     toolbox.register("select", tools.selTournament, tournsize=3)
@@ -192,11 +230,14 @@ def setup_toolbox(network: Network, penalty_coeff):
 
 def run_GA(
         network: Network,
-        npop = 200,
+        npop = 100,
         cxpb = 0.7,
-        mutpb = 0.4,
+        mutpb = 0.3,
         ngen = 200,
         penalty_coeff = 1000.0,
+        max_module_ratio = 0.3,
+        min_module_ratio = 0.2,
+        muLambda = (1, 1.7),
         log = True,
     ):
     """
@@ -206,6 +247,10 @@ def run_GA(
     - cxpb: cross over probability
     - mutpb: mutation probability
     - ngen: number of generations
+    - penalty_coeff: penalty for each flow unit over the capacity of an edge
+    - max_module_ratio: initial population % with maximum capacity modules selected
+    - min_module_ratio: initial population % with minimal capacity modules selected
+    - muLambda = (mu, lambda): mu*npop = nr of individuals selected per gen., lambda*npop = number of offspring created each gen.
     - log: whether stats should be printed
     """
     print_title("GENETIC ALGORITHM")
@@ -237,9 +282,14 @@ def run_GA(
 
     startTime = time.perf_counter()
     
-    pop, log = algorithms.eaSimple(
-        pop, toolbox, cxpb=cxpb, mutpb=mutpb, ngen=ngen,
-        stats=stats, halloffame=hof, verbose=log
+    # pop, log = algorithms.eaSimple(
+    #     pop, toolbox, cxpb=cxpb, mutpb=mutpb, ngen=ngen,
+    #     stats=stats, halloffame=hof, verbose=log
+    # )
+    mu, lambda_ = int(muLambda[0]*npop), int(muLambda[1]*npop)
+    pop, logbook = algorithms.eaMuPlusLambda(
+        pop, toolbox, mu, lambda_, cxpb, mutpb,
+        ngen=ngen, stats=stats, halloffame=hof, verbose=log
     )
 
     endTime = time.perf_counter()
