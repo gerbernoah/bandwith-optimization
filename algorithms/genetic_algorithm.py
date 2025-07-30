@@ -9,7 +9,7 @@ import time
 
 # Data Structures & Utilities
 from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
-from types2.biology import GAIndividual, Path, Paths5, DemandPaths, InitStrategy
+from types2.biology import GAIndividual, Path, Paths5, DemandPaths, InitStrategy, GAParams
 from types2.result import ResultGA
 from utilities.printing import print_title
 
@@ -230,14 +230,7 @@ def setup_toolbox(network: Network, penalty_coeff, max_module_ratio=0.3, min_mod
 
 def run_GA(
         network: Network,
-        npop = 100,
-        cxpb = 0.7,
-        mutpb = 0.3,
-        ngen = 200,
-        penalty_coeff = 1000.0,
-        max_module_ratio = 0.3,
-        min_module_ratio = 0.2,
-        muLambda = (1, 1.7),
+        p: GAParams,
         log = True,
     ):
     """
@@ -253,8 +246,7 @@ def run_GA(
     - muLambda = (mu, lambda): mu*npop = nr of individuals selected per gen., lambda*npop = number of offspring created each gen.
     - log: whether stats should be printed
     """
-    print_title("GENETIC ALGORITHM")
-    print("=== LOGGING ON ===" if log else "=== LOGGING OFF ===")
+    print_title("GENETIC ALGORITHM")  if log else None
 
     """
     ==================================================
@@ -267,12 +259,12 @@ def run_GA(
     global_demand_paths = precompute_demand_paths(network)
     
     # Setup GA
-    toolbox = setup_toolbox(network, penalty_coeff)
+    toolbox = setup_toolbox(network, p.penalty_coeff)
     _, _, _, uedges, _, demands = network.unpack()
     
     # Run GA
     random.seed(42)
-    pop = toolbox.population(n=npop) # type: ignore
+    pop = toolbox.population(n=p.npop) # type: ignore
     hof = tools.HallOfFame(1)
     
     # Statistics setup
@@ -282,14 +274,10 @@ def run_GA(
 
     startTime = time.perf_counter()
     
-    # pop, log = algorithms.eaSimple(
-    #     pop, toolbox, cxpb=cxpb, mutpb=mutpb, ngen=ngen,
-    #     stats=stats, halloffame=hof, verbose=log
-    # )
-    mu, lambda_ = int(muLambda[0]*npop), int(muLambda[1]*npop)
+    mu, lambda_ = int(p.muLambda[0]*p.npop), int(p.muLambda[1]*p.npop)
     pop, logbook = algorithms.eaMuPlusLambda(
-        pop, toolbox, mu, lambda_, cxpb, mutpb,
-        ngen=ngen, stats=stats, halloffame=hof, verbose=log
+        pop, toolbox, mu, lambda_, p.cxpb, p.mutpb,
+        ngen=p.ngen, stats=stats, halloffame=hof, verbose=log
     )
 
     endTime = time.perf_counter()
@@ -303,8 +291,8 @@ def run_GA(
     
     # Display results
     best_ind = hof[0]
-    print("\nBest solution found:")
-    print("Total cost:", best_ind.fitness.values[0])
+    print("\nBest solution found:") if log else None
+    print("Total cost:", best_ind.fitness.values[0])  if log else None
     
     # Detailed capacity utilization report
     _, _, edges, uedges, _, _ = network.unpack()
@@ -324,7 +312,9 @@ def run_GA(
         if uedge_id < len(uedge_flows):
             uedge_flows[uedge_id] += directed_edge_flows[edge.id]
     
-    print("\nEdge utilization:")
+    violation_count = 0
+
+    print("\nEdge utilization:") if log else None
     for i, uedge in enumerate(uedges):
         mod_idx = module_sel[i]
         capacity = 0
@@ -334,9 +324,12 @@ def run_GA(
         flow = uedge_flows[i]
         violation = max(0, flow - capacity)
         print(f"UEdge {i}: Flow={flow:.2f}/{capacity} ", 
-              f"(Violation: {violation:.2f})" if violation > 0 else "")
+              f"(Violation: {violation:.2f})" if violation > 0 else "") if log else None
+        if violation > 0:
+            violation_count += 1
     
     return ResultGA(
         total_runtime = runtime,
-        total_cost = best_ind.fitness.values[0]
+        total_cost = best_ind.fitness.values[0],
+        violations = violation_count
     )

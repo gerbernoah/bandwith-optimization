@@ -5,15 +5,17 @@ functions: parse_nodes, parse_demands, parse_edges, parse_network
 """
 # this works when this code is run from root directory
 from types2.network import Node, Demand, Edge, Module, NodeDict, UEdge, UEdgeToEdge, Network
+from types2.biology import GAParams
 
 # normal imports
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 import re
 from pathlib import Path
+import json, os
 
 """
 ==================================================
- PARSING FUNCTIONS
+ INPUT
 ==================================================
 """
 
@@ -131,3 +133,50 @@ def parse_network() -> Network:
         uedge_to_edge = uedge_to_edge,
         demands = demands
     )
+
+"""
+==================================================
+ OUTPUT
+==================================================
+"""
+
+def write_parameter_results(
+    param_name: str,
+    base_params: GAParams,
+    values: List[Union[int, float]],
+    results: List[List[float]],
+    runtimes: List[List[float]]
+):
+    """
+    Write parameter analysis results to file
+    Format:
+    Line 1: JSON string of base parameters
+    Line 2: JSON list of tested values
+    Line 3: JSON list of results lists
+    Line 4: JSON list of runtime lists
+    """
+    filename = f"{param_name}.txt"
+    filepath = os.path.join("output", filename)
+    
+    with open(filepath, 'w') as f:
+        f.write(json.dumps(base_params.__dict__) + "\n")
+        f.write(json.dumps(values) + "\n")
+        f.write(json.dumps(results) + "\n")
+        f.write(json.dumps(runtimes) + "\n")
+    print(f"Saved results for {param_name} to {filepath}")
+
+def read_parameter_results(filepath: str):
+    """
+    Read parameter analysis results from file
+    Returns tuple: (base_params, values, results, runtimes)
+    """
+    with open(filepath, 'r') as f:
+        # Read all lines
+        lines = f.readlines()
+        base_params_dict = json.loads(lines[0].strip())
+        base_params = GAParams(**base_params_dict)
+        values = json.loads(lines[1].strip())
+        results = json.loads(lines[2].strip())
+        runtimes = json.loads(lines[3].strip())
+    
+    return base_params, values, results, runtimes
