@@ -246,17 +246,10 @@ def setup_toolbox(network: Network, penalty_coeff, max_module_ratio=0.3, indp=0.
 
 
 def run_GA(
-<<<<<<< HEAD
-        network: Network,
-        p: GAParams,
-        log = True,
-    ):
-=======
     network: Network,
     p: GAParams,
     log=True,
 ):
->>>>>>> GA_optimization
     """
     Args:
     - network: input data parsed as Network
@@ -270,11 +263,7 @@ def run_GA(
     - muLambda = (mu, lambda): mu*npop = nr of individuals selected per gen., lambda*npop = number of offspring created each gen.
     - log: whether stats should be printed
     """
-<<<<<<< HEAD
-    print_title("GENETIC ALGORITHM")  if log else None
-=======
     print_title("GENETIC ALGORITHM") if log else None
->>>>>>> GA_optimization
 
     """
     ==================================================
@@ -287,9 +276,6 @@ def run_GA(
     global_demand_paths = precompute_demand_paths(network)
 
     # Setup GA
-<<<<<<< HEAD
-    toolbox = setup_toolbox(network, p.penalty_coeff)
-=======
     toolbox = setup_toolbox(
         network=network,
         penalty_coeff=p.penalty_coeff,
@@ -297,16 +283,11 @@ def run_GA(
         indp=p.indp,
         tournsize=p.tournsize
     )
->>>>>>> GA_optimization
     _, _, _, uedges, _, demands = network.unpack()
 
     # Run GA
     random.seed(42)
-<<<<<<< HEAD
-    pop = toolbox.population(n=p.npop) # type: ignore
-=======
     pop = toolbox.population(n=p.npop)  # type: ignore
->>>>>>> GA_optimization
     hof = tools.HallOfFame(1)
 
     # Statistics setup
@@ -315,11 +296,6 @@ def run_GA(
     stats.register("avg", np.mean)
 
     startTime = time.perf_counter()
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> GA_optimization
     mu, lambda_ = int(p.muLambda[0]*p.npop), int(p.muLambda[1]*p.npop)
     pop, logbook = algorithms.eaMuPlusLambda(
         pop, toolbox, mu, lambda_, p.cxpb, p.mutpb,
@@ -338,13 +314,8 @@ def run_GA(
     # Display results
     best_ind = hof[0]
     print("\nBest solution found:") if log else None
-<<<<<<< HEAD
-    print("Total cost:", best_ind.fitness.values[0])  if log else None
-    
-=======
     print("Total cost:", best_ind.fitness.values[0]) if log else None
 
->>>>>>> GA_optimization
     # Detailed capacity utilization report
     _, _, edges, uedges, _, _ = network.unpack()
     module_sel, flow_fracs = best_ind.module_selections, best_ind.flow_fractions
@@ -362,11 +333,6 @@ def run_GA(
         uedge_id = edge.uEdge.id
         if uedge_id < len(uedge_flows):
             uedge_flows[uedge_id] += directed_edge_flows[edge.id]
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> GA_optimization
     violation_count = 0
 
     print("\nEdge utilization:") if log else None
@@ -378,18 +344,6 @@ def run_GA(
 
         flow = uedge_flows[i]
         violation = max(0, flow - capacity)
-<<<<<<< HEAD
-        print(f"UEdge {i}: Flow={flow:.2f}/{capacity} ", 
-              f"(Violation: {violation:.2f})" if violation > 0 else "") if log else None
-        if violation > 0:
-            violation_count += 1
-    
-    return ResultGA(
-        total_runtime = runtime,
-        total_cost = best_ind.fitness.values[0],
-        violations = violation_count
-    )
-=======
         print(f"UEdge {i}: Flow={flow:.2f}/{capacity} ",
               f"(Violation: {violation:.2f})" if violation > 0 else "") if log else None
         if violation > 0:
@@ -400,4 +354,3 @@ def run_GA(
         total_cost=best_ind.fitness.values[0],
         violations=violation_count
     )
->>>>>>> GA_optimization

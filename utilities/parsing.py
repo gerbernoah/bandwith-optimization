@@ -11,12 +11,8 @@ from types2.biology import GAParams
 from typing import List, Dict, Tuple, Union
 import re
 from pathlib import Path
-<<<<<<< HEAD
-import json, os
-=======
 import json
 import os
->>>>>>> GA_optimization
 
 """
 ==================================================
@@ -140,16 +136,6 @@ def parse_network() -> Network:
     demands = parse_demands(node_dict)
 
     return Network(
-<<<<<<< HEAD
-        nodes = nodes,
-        node_dict = node_dict,
-        edges = edges,
-        uedges = uedges,
-        uedge_to_edge = uedge_to_edge,
-        demands = demands
-    )
-
-=======
         nodes=nodes,
         node_dict=node_dict,
         edges=edges,
@@ -159,21 +145,15 @@ def parse_network() -> Network:
     )
 
 
->>>>>>> GA_optimization
 """
 ==================================================
  OUTPUT
 ==================================================
 """
 
-<<<<<<< HEAD
-def write_parameter_results(
-    param_name: str,
-=======
 
 def write_parameter_results(
     file_name: str,
->>>>>>> GA_optimization
     base_params: GAParams,
     values: List[Union[int, float]],
     results: List[List[float]],
@@ -187,26 +167,16 @@ def write_parameter_results(
     Line 3: JSON list of results lists
     Line 4: JSON list of runtime lists
     """
-<<<<<<< HEAD
-    filename = f"{param_name}.txt"
-    filepath = os.path.join("output", filename)
-    
-=======
     filename = f"{file_name}.txt"
     filepath = os.path.join("output", filename)
 
->>>>>>> GA_optimization
     with open(filepath, 'w') as f:
         f.write(json.dumps(base_params.__dict__) + "\n")
         f.write(json.dumps(values) + "\n")
         f.write(json.dumps(results) + "\n")
         f.write(json.dumps(runtimes) + "\n")
-<<<<<<< HEAD
-    print(f"Saved results for {param_name} to {filepath}")
-=======
     print(f"Saved results for {file_name} to {filepath}")
 
->>>>>>> GA_optimization
 
 def read_parameter_results(filepath: str):
     """
@@ -221,10 +191,5 @@ def read_parameter_results(filepath: str):
         values = json.loads(lines[1].strip())
         results = json.loads(lines[2].strip())
         runtimes = json.loads(lines[3].strip())
-<<<<<<< HEAD
-    
-    return base_params, values, results, runtimes
-=======
 
     return base_params, values, results, runtimes
->>>>>>> GA_optimization
