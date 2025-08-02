@@ -1,0 +1,23 @@
+base_params = GAParams(
+    npop=80,
+    cxpb=0.6,
+    mutpb=0.2,
+    ngen=40,
+    penalty_coeff=100000.0,
+    max_module_ratio=0.4,
+    min_module_ratio=0.2,
+    muLambda=(1, 1.7),
+    indp=0.4,
+    tournsize=3
+)
+
+# number of runs per param value
+# nruns = [18, 19, 20]
+nruns = [3, 4, 5]
+
+# Define param values
+cxpb = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+mutpb = [0.1, 0.2, 0.3, 0.4]
+penalty_coeff = [10, 100, 1000, 10000, 100000, 1000000]
+tournsize = [2, 3, 4, 5]
+indp = [0.1, 0.2, 0.3, 0.4]
