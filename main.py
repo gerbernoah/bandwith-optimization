@@ -30,16 +30,16 @@ network = parse_network()
 # print_summary("GA", results)
 
 base_params = GAParams(
-    npop = 100,
-    cxpb = 0.8,
-    mutpb = 0.2,
-    ngen = 100,
-    penalty_coeff = 100000.0,
-    max_module_ratio = 0.4,
-    min_module_ratio = 0.2,
-    muLambda = (1, 1.7),
-    indp = 0.4,
-    tournsize = 3
+    npop=10,
+    cxpb=0.8,
+    mutpb=0.2,
+    ngen=10,
+    penalty_coeff=100000.0,
+    max_module_ratio=0.4,
+    min_module_ratio=0.2,
+    muLambda=(1, 1.7),
+    indp=0.4,
+    tournsize=3
 )
 
 # population
@@ -55,12 +55,16 @@ optimum = 30000000
 param_lists = [mutpb, penalty_coeff]
 param_lists_names = ["mutpb", "penalty_coeff"]
 for i in range(len(param_lists)):
-    
-    for j in range(len(pops)):
-        # CHANGE POP
-        run_parameter_analysis(network, base_params, param_lists_names[i], param_lists[i], 3)
-    plot_parameter_performance(param_lists_names[i], optimum)
-    plot_parameter_runtime(param_lists_names[i])
 
-plot_parameter_runtime("penalty_coeff")
-plot_parameter_performance("penalty_coeff", optimum)
+    file_names = []
+    for j in range(len(pops)):
+        file_name = param_lists_names[i] + "_pop_" + str(pops[j])
+        file_names.append(file_name)
+        run_parameter_analysis(
+            network, file_name, base_params, param_lists_names[i], param_lists[i], 3)
+
+    plot_parameter_performance(file_names, optimum)
+    plot_parameter_runtime(file_names)
+
+plot_parameter_runtime(["penalty_coeff"])
+plot_parameter_performance(["penalty_coeff"], optimum)
