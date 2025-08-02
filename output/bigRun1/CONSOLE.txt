@@ -1,0 +1,608 @@
+============================================================
+INTEGER PROGRAMMING
+============================================================
+=== LOGGING ON ===
+Set parameter Username
+Set parameter LicenseID to value 2690685
+Academic license - for non-commercial use only - expires 2026-07-25
+Set parameter OutputFlag to value 1
+Set parameter TimeLimit to value 180
+Set parameter MIPGap to value 0.1
+Gurobi Optimizer version 12.0.3 build v12.0.3rc0 (win64 - Windows 11.0 (26100.2))
+
+CPU model: AMD Ryzen 7 9700X 8-Core Processor, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 8 physical cores, 16 logical processors, using up to 16 threads
+
+Non-default parameters:
+TimeLimit  180
+MIPGap  0.1
+
+Optimize a model with 49398 rows, 152019 columns and 455886 nonzeros
+Model fingerprint: 0x118415b6
+Variable types: 151848 continuous, 171 integer (171 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+05]
+  Objective range  [2e+00, 2e+06]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 6e+03]
+Presolve removed 11340 rows and 22680 columns
+Presolve time: 0.39s
+Presolved: 38058 rows, 129339 columns, 410526 nonzeros
+Variable types: 129168 continuous, 171 integer (171 binary)
+Deterministic concurrent LP optimizer: primal and dual simplex
+Showing primal log only...
+
+Concurrent spin time: 0.00s
+
+Solved with primal simplex
+
+Root relaxation: objective 2.016152e+07, 33165 iterations, 0.33 seconds (0.49 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 2.0162e+07    0   56          - 2.0162e+07      -     -    1s
+H    0     0                    4.200161e+07 2.0162e+07  52.0%     -    3s
+H    0     0                    3.228215e+07 2.0162e+07  37.5%     -    3s
+     0     0 2.1604e+07    0  107 3.2282e+07 2.1604e+07  33.1%     -    6s
+     0     0 2.1618e+07    0  107 3.2282e+07 2.1618e+07  33.0%     -    6s
+     0     0 2.1621e+07    0  107 3.2282e+07 2.1621e+07  33.0%     -    6s
+     0     0 2.1621e+07    0  107 3.2282e+07 2.1621e+07  33.0%     -    6s
+     0     0 2.2068e+07    0  114 3.2282e+07 2.2068e+07  31.6%     -   11s
+     0     0 2.2114e+07    0  116 3.2282e+07 2.2114e+07  31.5%     -   13s
+     0     0 2.2119e+07    0  118 3.2282e+07 2.2119e+07  31.5%     -   13s
+     0     0 2.2155e+07    0  118 3.2282e+07 2.2155e+07  31.4%     -   13s
+     0     0 2.2156e+07    0  118 3.2282e+07 2.2156e+07  31.4%     -   13s
+     0     0 2.2236e+07    0  115 3.2282e+07 2.2236e+07  31.1%     -   14s
+     0     0 2.2242e+07    0  116 3.2282e+07 2.2242e+07  31.1%     -   15s
+     0     0 2.2257e+07    0  117 3.2282e+07 2.2257e+07  31.1%     -   15s
+     0     0 2.2263e+07    0  117 3.2282e+07 2.2263e+07  31.0%     -   15s
+     0     0 2.2265e+07    0  116 3.2282e+07 2.2265e+07  31.0%     -   16s
+     0     0 2.2266e+07    0  116 3.2282e+07 2.2266e+07  31.0%     -   16s
+     0     0 2.2266e+07    0  115 3.2282e+07 2.2266e+07  31.0%     -   16s
+     0     0 2.2295e+07    0  119 3.2282e+07 2.2295e+07  30.9%     -   18s
+     0     0 2.2299e+07    0  119 3.2282e+07 2.2299e+07  30.9%     -   18s
+     0     0 2.2299e+07    0  119 3.2282e+07 2.2299e+07  30.9%     -   19s
+     0     0 2.2315e+07    0  120 3.2282e+07 2.2315e+07  30.9%     -   20s
+     0     0 2.2317e+07    0  119 3.2282e+07 2.2317e+07  30.9%     -   21s
+     0     0 2.2317e+07    0  119 3.2282e+07 2.2317e+07  30.9%     -   21s
+     0     0 2.2330e+07    0  120 3.2282e+07 2.2330e+07  30.8%     -   23s
+     0     0 2.2332e+07    0  121 3.2282e+07 2.2332e+07  30.8%     -   24s
+     0     0 2.2334e+07    0  121 3.2282e+07 2.2334e+07  30.8%     -   24s
+     0     0 2.2334e+07    0  121 3.2282e+07 2.2334e+07  30.8%     -   24s
+     0     0 2.2336e+07    0  121 3.2282e+07 2.2336e+07  30.8%     -   25s
+H    0     0                    3.227783e+07 2.2336e+07  30.8%     -   25s
+H    0     0                    3.226756e+07 2.2336e+07  30.8%     -   25s
+H    0     0                    2.995528e+07 2.2336e+07  25.4%     -   25s
+     0     0 2.2336e+07    0  121 2.9955e+07 2.2336e+07  25.4%     -   26s
+     0     0 2.2338e+07    0  120 2.9955e+07 2.2338e+07  25.4%     -   27s
+     0     0 2.2340e+07    0  121 2.9955e+07 2.2340e+07  25.4%     -   27s
+     0     0 2.2340e+07    0  121 2.9955e+07 2.2340e+07  25.4%     -   27s
+     0     0 2.2340e+07    0  120 2.9955e+07 2.2340e+07  25.4%     -   28s
+     0     0 2.2340e+07    0  120 2.9955e+07 2.2340e+07  25.4%     -   29s
+     0     0 2.2341e+07    0  120 2.9955e+07 2.2341e+07  25.4%     -   29s
+     0     0 2.2341e+07    0  120 2.9955e+07 2.2341e+07  25.4%     -   30s
+     0     0 2.2341e+07    0  120 2.9955e+07 2.2341e+07  25.4%     -   30s
+     0     2 2.2341e+07    0  120 2.9955e+07 2.2341e+07  25.4%     -   31s
+     1     4 2.2357e+07    1  121 2.9955e+07 2.2342e+07  25.4%   891   35s
+     3     7 2.2361e+07    2  120 2.9955e+07 2.2361e+07  25.4%  2027   42s
+     6    13 2.2375e+07    3  119 2.9955e+07 2.2362e+07  25.3%  2616   55s
+    12    21 2.2673e+07    4  115 2.9955e+07 2.2362e+07  25.3%  3140   64s
+    20    41 2.2709e+07    5  113 2.9955e+07 2.2362e+07  25.3%  2817   76s
+    40    48 2.2571e+07    7  108 2.9955e+07 2.2362e+07  25.3%  2067   87s
+    47    65 2.2844e+07    7  108 2.9955e+07 2.2362e+07  25.3%  2248   97s
+    64    86 2.2917e+07    8  106 2.9955e+07 2.2362e+07  25.3%  2083  104s
+    87   109 2.2840e+07   11   96 2.9955e+07 2.2362e+07  25.3%  1857  113s
+   114   134 2.3097e+07    9  103 2.9955e+07 2.2362e+07  25.3%  1576  119s
+   139   148 2.3163e+07   11  101 2.9955e+07 2.2362e+07  25.3%  1436  127s
+   153   158 2.3365e+07   13   97 2.9955e+07 2.2362e+07  25.3%  1442  134s
+   163   171 2.3590e+07   14   92 2.9955e+07 2.2362e+07  25.3%  1459  140s
+   176   182 2.3392e+07   14   95 2.9955e+07 2.2362e+07  25.3%  1475  147s
+   187   194 2.3516e+07   15   93 2.9955e+07 2.2362e+07  25.3%  1508  158s
+   203   204 2.3541e+07   16   91 2.9955e+07 2.2362e+07  25.3%  1493  166s
+   220   214 2.3779e+07   16   88 2.9955e+07 2.2362e+07  25.3%  1478  175s
+   234   218 2.3984e+07   17   91 2.9955e+07 2.2362e+07  25.3%  1506  180s
+
+Cutting planes:
+  Lift-and-project: 38
+  Implied bound: 144
+  MIR: 187
+
+Explored 238 nodes (407246 simplex iterations) in 180.08 seconds (463.15 work units)
+Thread count was 16 (of 16 available processors)
+
+Solution count 5: 2.99553e+07 2.99553e+07 3.22676e+07 ... 4.20016e+07
+
+Time limit reached
+Best objective 2.995527952975e+07, best bound 2.236172611046e+07, gap 25.3496%
+
+============================================================
+Integer Programming OPTIMIZATION RESULTS
+============================================================
+Total Runtime: 180.08 seconds
+Total Cost: $29,955,279.53
+
+=== Running cxpb = 0.1 ===
+Run 1/3: Cost = 1.34e+09, Violoations: 3, Time = 11.08s
+Run 2/3: Cost = 6.63e+08, Violoations: 2, Time = 10.96s
+Run 3/3: Cost = 6.14e+08, Violoations: 2, Time = 10.96s
+
+=== Running cxpb = 0.2 ===
+Run 1/3: Cost = 3.12e+08, Violoations: 1, Time = 16.56s
+Run 2/3: Cost = 6.02e+08, Violoations: 1, Time = 16.61s
+Run 3/3: Cost = 5.17e+08, Violoations: 1, Time = 16.51s
+
+=== Running cxpb = 0.3 ===
+Run 1/3: Cost = 1.55e+08, Violoations: 2, Time = 21.99s
+Run 2/3: Cost = 4.70e+07, Violoations: 0, Time = 21.93s
+Run 3/3: Cost = 4.69e+07, Violoations: 0, Time = 21.98s
+
+=== Running cxpb = 0.4 ===
+Run 1/3: Cost = 1.78e+08, Violoations: 1, Time = 27.80s
+Run 2/3: Cost = 4.69e+07, Violoations: 0, Time = 27.64s
+Run 3/3: Cost = 1.33e+08, Violoations: 1, Time = 27.78s
+
+=== Running cxpb = 0.5 ===
+Run 1/3: Cost = 4.03e+08, Violoations: 1, Time = 33.99s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 36.69s
+Run 3/3: Cost = 4.69e+07, Violoations: 0, Time = 40.21s
+
+=== Running cxpb = 0.6 ===
+Run 1/3: Cost = 4.66e+07, Violoations: 0, Time = 39.85s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 39.84s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 40.16s
+
+=== Running cxpb = 0.7 ===
+Run 1/3: Cost = 4.66e+07, Violoations: 0, Time = 49.55s
+Run 2/3: Cost = 4.67e+07, Violoations: 0, Time = 50.91s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 46.81s
+
+=== Running cxpb = 0.8 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 53.12s
+Run 2/3: Cost = 4.65e+07, Violoations: 0, Time = 53.12s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 53.09s
+Saved results for cxpb_pop_3 to output\cxpb_pop_3.txt
+
+=== Running cxpb = 0.1 ===
+Run 1/4: Cost = 1.82e+09, Violoations: 3, Time = 11.06s
+Run 2/4: Cost = 1.39e+09, Violoations: 2, Time = 10.98s
+Run 3/4: Cost = 8.36e+08, Violoations: 2, Time = 11.04s
+Run 4/4: Cost = 1.57e+09, Violoations: 2, Time = 11.03s
+
+=== Running cxpb = 0.2 ===
+Run 1/4: Cost = 5.59e+08, Violoations: 1, Time = 16.57s
+Run 2/4: Cost = 4.06e+08, Violoations: 2, Time = 16.53s
+Run 3/4: Cost = 2.87e+08, Violoations: 1, Time = 16.57s
+Run 4/4: Cost = 5.77e+08, Violoations: 1, Time = 16.54s
+
+=== Running cxpb = 0.3 ===
+Run 1/4: Cost = 2.01e+08, Violoations: 1, Time = 22.00s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 21.94s
+Run 3/4: Cost = 2.78e+08, Violoations: 1, Time = 21.93s
+Run 4/4: Cost = 2.13e+08, Violoations: 1, Time = 22.12s
+
+=== Running cxpb = 0.4 ===
+Run 1/4: Cost = 4.70e+07, Violoations: 0, Time = 28.32s
+Run 2/4: Cost = 4.71e+07, Violoations: 0, Time = 27.86s
+Run 3/4: Cost = 1.19e+08, Violoations: 1, Time = 27.90s
+Run 4/4: Cost = 1.88e+08, Violoations: 1, Time = 27.90s
+
+=== Running cxpb = 0.5 ===
+Run 1/4: Cost = 4.70e+07, Violoations: 0, Time = 34.02s
+Run 2/4: Cost = 4.67e+07, Violoations: 0, Time = 34.20s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 34.33s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 34.29s
+
+=== Running cxpb = 0.6 ===
+Run 1/4: Cost = 4.68e+07, Violoations: 0, Time = 40.13s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 39.74s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 40.02s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 39.75s
+
+=== Running cxpb = 0.7 ===
+Run 1/4: Cost = 4.67e+07, Violoations: 0, Time = 46.90s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 46.85s
+Run 3/4: Cost = 4.67e+07, Violoations: 0, Time = 47.19s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 47.35s
+
+=== Running cxpb = 0.8 ===
+Run 1/4: Cost = 4.67e+07, Violoations: 0, Time = 53.35s
+Run 2/4: Cost = 4.65e+07, Violoations: 0, Time = 53.15s
+Run 3/4: Cost = 4.67e+07, Violoations: 0, Time = 53.29s
+Run 4/4: Cost = 4.67e+07, Violoations: 0, Time = 52.82s
+Saved results for cxpb_pop_4 to output\cxpb_pop_4.txt
+
+=== Running cxpb = 0.1 ===
+Run 1/5: Cost = 1.68e+09, Violoations: 3, Time = 11.11s
+Run 2/5: Cost = 8.84e+08, Violoations: 2, Time = 11.00s
+Run 3/5: Cost = 9.42e+08, Violoations: 1, Time = 10.97s
+Run 4/5: Cost = 1.51e+09, Violoations: 3, Time = 10.93s
+Run 5/5: Cost = 1.42e+09, Violoations: 2, Time = 10.92s
+
+=== Running cxpb = 0.2 ===
+Run 1/5: Cost = 4.70e+07, Violoations: 0, Time = 16.58s
+Run 2/5: Cost = 4.41e+08, Violoations: 1, Time = 16.55s
+Run 3/5: Cost = 3.10e+08, Violoations: 1, Time = 16.60s
+Run 4/5: Cost = 6.28e+08, Violoations: 1, Time = 16.66s
+Run 5/5: Cost = 5.89e+08, Violoations: 1, Time = 16.73s
+
+=== Running cxpb = 0.3 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 22.18s
+Run 2/5: Cost = 4.69e+07, Violoations: 0, Time = 22.15s
+Run 3/5: Cost = 1.19e+08, Violoations: 1, Time = 22.23s
+Run 4/5: Cost = 3.46e+08, Violoations: 1, Time = 22.16s
+Run 5/5: Cost = 6.71e+07, Violoations: 1, Time = 22.15s
+
+=== Running cxpb = 0.4 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 28.20s
+Run 2/5: Cost = 1.30e+08, Violoations: 2, Time = 27.96s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 28.14s
+Run 4/5: Cost = 4.69e+07, Violoations: 0, Time = 28.10s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 28.18s
+
+=== Running cxpb = 0.5 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 34.36s
+Run 2/5: Cost = 4.69e+07, Violoations: 0, Time = 34.62s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 34.21s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 33.99s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 34.27s
+
+=== Running cxpb = 0.6 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 40.05s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 40.19s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 39.87s
+Run 4/5: Cost = 4.69e+07, Violoations: 0, Time = 40.08s
+Run 5/5: Cost = 4.69e+07, Violoations: 0, Time = 39.95s
+
+=== Running cxpb = 0.7 ===
+Run 1/5: Cost = 4.66e+07, Violoations: 0, Time = 47.05s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 46.79s
+Run 3/5: Cost = 4.66e+07, Violoations: 0, Time = 47.18s
+Run 4/5: Cost = 4.66e+07, Violoations: 0, Time = 46.81s
+Run 5/5: Cost = 4.67e+07, Violoations: 0, Time = 47.43s
+
+=== Running cxpb = 0.8 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 53.19s
+Run 2/5: Cost = 4.67e+07, Violoations: 0, Time = 53.32s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 53.20s
+Run 4/5: Cost = 4.67e+07, Violoations: 0, Time = 53.42s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 53.32s
+Saved results for cxpb_pop_5 to output\cxpb_pop_5.txt
+qt.qpa.screen: "Unable to open monitor interface to \\\\.\\DISPLAY1:" "Unknown error 0xe0000225."
+
+=== Running mutpb = 0.1 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 36.25s
+Run 2/3: Cost = 4.69e+07, Violoations: 0, Time = 36.11s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 36.22s
+
+=== Running mutpb = 0.2 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 40.58s
+Run 2/3: Cost = 4.67e+07, Violoations: 0, Time = 40.63s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 40.64s
+
+=== Running mutpb = 0.3 ===
+Run 1/3: Cost = 4.69e+07, Violoations: 0, Time = 45.10s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 45.17s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 45.12s
+
+=== Running mutpb = 0.4 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 49.09s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 49.25s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 48.93s
+Saved results for mutpb_pop_3 to output\mutpb_pop_3.txt
+
+=== Running mutpb = 0.1 ===
+Run 1/4: Cost = 4.66e+07, Violoations: 0, Time = 36.33s
+Run 2/4: Cost = 4.67e+07, Violoations: 0, Time = 36.29s
+Run 3/4: Cost = 4.69e+07, Violoations: 0, Time = 35.95s
+Run 4/4: Cost = 4.67e+07, Violoations: 0, Time = 36.31s
+
+=== Running mutpb = 0.2 ===
+Run 1/4: Cost = 4.67e+07, Violoations: 0, Time = 40.75s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 40.34s
+Run 3/4: Cost = 4.69e+07, Violoations: 0, Time = 40.43s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 40.49s
+
+=== Running mutpb = 0.3 ===
+Run 1/4: Cost = 4.69e+07, Violoations: 0, Time = 45.39s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 45.26s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 44.98s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 45.11s
+
+=== Running mutpb = 0.4 ===
+Run 1/4: Cost = 4.69e+07, Violoations: 0, Time = 48.89s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 49.38s
+Run 3/4: Cost = 4.60e+07, Violoations: 0, Time = 49.11s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 49.19s
+Saved results for mutpb_pop_4 to output\mutpb_pop_4.txt
+
+=== Running mutpb = 0.1 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 36.57s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 36.20s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 36.16s
+Run 4/5: Cost = 4.69e+07, Violoations: 0, Time = 36.42s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 36.57s
+
+=== Running mutpb = 0.2 ===
+Run 1/5: Cost = 4.67e+07, Violoations: 0, Time = 40.68s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 40.84s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 40.85s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 41.00s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 40.81s
+
+=== Running mutpb = 0.3 ===
+Run 1/5: Cost = 4.67e+07, Violoations: 0, Time = 45.45s
+Run 2/5: Cost = 4.70e+07, Violoations: 0, Time = 45.16s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 45.34s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 44.74s
+Run 5/5: Cost = 4.67e+07, Violoations: 0, Time = 44.69s
+
+=== Running mutpb = 0.4 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 48.48s
+Run 2/5: Cost = 4.69e+07, Violoations: 0, Time = 48.54s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 48.88s
+Run 4/5: Cost = 4.69e+07, Violoations: 0, Time = 48.77s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 48.79s
+Saved results for mutpb_pop_5 to output\mutpb_pop_5.txt
+
+=== Running penalty_coeff = 10 ===
+Run 1/3: Cost = 3.53e+07, Violoations: 23, Time = 40.93s
+Run 2/3: Cost = 3.49e+07, Violoations: 26, Time = 40.76s
+Run 3/3: Cost = 3.48e+07, Violoations: 28, Time = 40.76s
+
+=== Running penalty_coeff = 100 ===
+Run 1/3: Cost = 4.67e+07, Violoations: 0, Time = 40.73s
+Run 2/3: Cost = 4.66e+07, Violoations: 0, Time = 41.47s
+Run 3/3: Cost = 4.66e+07, Violoations: 1, Time = 41.23s
+
+=== Running penalty_coeff = 1000 ===
+Run 1/3: Cost = 4.69e+07, Violoations: 0, Time = 41.39s
+Run 2/3: Cost = 4.67e+07, Violoations: 0, Time = 41.46s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 41.66s
+
+=== Running penalty_coeff = 10000 ===
+Run 1/3: Cost = 4.69e+07, Violoations: 0, Time = 41.58s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 41.81s
+Run 3/3: Cost = 4.69e+07, Violoations: 0, Time = 41.85s
+
+=== Running penalty_coeff = 100000 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 41.64s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 41.85s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 41.99s
+
+=== Running penalty_coeff = 1000000 ===
+Run 1/3: Cost = 4.69e+07, Violoations: 0, Time = 41.60s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 41.81s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 41.52s
+Saved results for penalty_coeff_pop_3 to output\penalty_coeff_pop_3.txt
+
+=== Running penalty_coeff = 10 ===
+Run 1/4: Cost = 3.54e+07, Violoations: 25, Time = 42.00s
+Run 2/4: Cost = 3.45e+07, Violoations: 25, Time = 42.19s
+Run 3/4: Cost = 3.49e+07, Violoations: 26, Time = 42.16s
+Run 4/4: Cost = 3.57e+07, Violoations: 26, Time = 42.04s
+
+=== Running penalty_coeff = 100 ===
+Run 1/4: Cost = 4.66e+07, Violoations: 0, Time = 41.68s
+Run 2/4: Cost = 4.67e+07, Violoations: 0, Time = 41.82s
+Run 3/4: Cost = 4.67e+07, Violoations: 0, Time = 40.91s
+Run 4/4: Cost = 4.66e+07, Violoations: 0, Time = 40.71s
+
+=== Running penalty_coeff = 1000 ===
+Run 1/4: Cost = 4.68e+07, Violoations: 0, Time = 40.38s
+Run 2/4: Cost = 4.70e+07, Violoations: 0, Time = 40.86s
+Run 3/4: Cost = 4.67e+07, Violoations: 0, Time = 41.11s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 40.78s
+
+=== Running penalty_coeff = 10000 ===
+Run 1/4: Cost = 4.67e+07, Violoations: 0, Time = 40.65s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 40.55s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 40.54s
+Run 4/4: Cost = 4.70e+07, Violoations: 0, Time = 40.70s
+
+=== Running penalty_coeff = 100000 ===
+Run 1/4: Cost = 4.68e+07, Violoations: 0, Time = 41.19s
+Run 2/4: Cost = 4.67e+07, Violoations: 0, Time = 40.88s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 40.91s
+Run 4/4: Cost = 4.67e+07, Violoations: 0, Time = 41.12s
+
+=== Running penalty_coeff = 1000000 ===
+Run 1/4: Cost = 4.68e+07, Violoations: 0, Time = 40.76s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 41.09s
+Run 3/4: Cost = 4.70e+07, Violoations: 0, Time = 40.94s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 40.95s
+Saved results for penalty_coeff_pop_4 to output\penalty_coeff_pop_4.txt
+
+=== Running penalty_coeff = 10 ===
+Run 1/5: Cost = 3.45e+07, Violoations: 28, Time = 41.28s
+Run 2/5: Cost = 3.48e+07, Violoations: 25, Time = 41.12s
+Run 3/5: Cost = 3.49e+07, Violoations: 28, Time = 41.09s
+Run 4/5: Cost = 3.51e+07, Violoations: 27, Time = 40.86s
+Run 5/5: Cost = 3.54e+07, Violoations: 27, Time = 40.98s
+
+=== Running penalty_coeff = 100 ===
+Run 1/5: Cost = 4.67e+07, Violoations: 0, Time = 40.77s
+Run 2/5: Cost = 4.67e+07, Violoations: 0, Time = 40.75s
+Run 3/5: Cost = 4.67e+07, Violoations: 0, Time = 40.87s
+Run 4/5: Cost = 4.67e+07, Violoations: 0, Time = 40.80s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 40.73s
+
+=== Running penalty_coeff = 1000 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 41.16s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 40.84s
+Run 3/5: Cost = 4.67e+07, Violoations: 0, Time = 40.76s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 41.02s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 41.00s
+
+=== Running penalty_coeff = 10000 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 40.88s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 41.06s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 40.87s
+Run 4/5: Cost = 4.67e+07, Violoations: 0, Time = 41.06s
+Run 5/5: Cost = 4.67e+07, Violoations: 0, Time = 41.01s
+
+=== Running penalty_coeff = 100000 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 41.09s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 41.05s
+Run 3/5: Cost = 4.67e+07, Violoations: 0, Time = 40.84s
+Run 4/5: Cost = 4.67e+07, Violoations: 0, Time = 41.00s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 41.06s
+
+=== Running penalty_coeff = 1000000 ===
+Run 1/5: Cost = 4.68e+07, Violoations: 0, Time = 41.04s
+Run 2/5: Cost = 4.67e+07, Violoations: 0, Time = 40.73s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 40.92s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 41.34s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 41.11s
+Saved results for penalty_coeff_pop_5 to output\penalty_coeff_pop_5.txt
+
+=== Running tournsize = 2 ===
+Run 1/3: Cost = 4.69e+07, Violoations: 0, Time = 42.62s
+Run 2/3: Cost = 1.24e+08, Violoations: 1, Time = 42.45s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 42.38s
+
+=== Running tournsize = 3 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 41.68s
+Run 2/3: Cost = 4.67e+07, Violoations: 0, Time = 41.89s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 41.82s
+
+=== Running tournsize = 4 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 42.20s
+Run 2/3: Cost = 4.67e+07, Violoations: 0, Time = 42.14s
+Run 3/3: Cost = 4.65e+07, Violoations: 0, Time = 42.20s
+
+=== Running tournsize = 5 ===
+Run 1/3: Cost = 4.67e+07, Violoations: 0, Time = 41.84s
+Run 2/3: Cost = 4.66e+07, Violoations: 0, Time = 41.93s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 42.02s
+Saved results for tournsize_pop_3 to output\tournsize_pop_3.txt
+
+=== Running tournsize = 2 ===
+Run 1/4: Cost = 2.21e+08, Violoations: 1, Time = 42.56s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 42.21s
+Run 3/4: Cost = 1.84e+08, Violoations: 1, Time = 42.41s
+Run 4/4: Cost = 6.63e+07, Violoations: 1, Time = 42.53s
+
+=== Running tournsize = 3 ===
+Run 1/4: Cost = 4.69e+07, Violoations: 0, Time = 41.92s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 41.95s
+Run 3/4: Cost = 4.66e+07, Violoations: 0, Time = 42.05s
+Run 4/4: Cost = 4.67e+07, Violoations: 0, Time = 41.93s
+
+=== Running tournsize = 4 ===
+Run 1/4: Cost = 4.69e+07, Violoations: 0, Time = 42.24s
+Run 2/4: Cost = 4.69e+07, Violoations: 0, Time = 42.32s
+Run 3/4: Cost = 4.67e+07, Violoations: 0, Time = 42.30s
+Run 4/4: Cost = 4.66e+07, Violoations: 0, Time = 42.34s
+
+=== Running tournsize = 5 ===
+Run 1/4: Cost = 4.66e+07, Violoations: 0, Time = 42.02s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 41.76s
+Run 3/4: Cost = 4.69e+07, Violoations: 0, Time = 41.90s
+Run 4/4: Cost = 4.67e+07, Violoations: 0, Time = 41.90s
+Saved results for tournsize_pop_4 to output\tournsize_pop_4.txt
+
+=== Running tournsize = 2 ===
+Run 1/5: Cost = 4.70e+07, Violoations: 0, Time = 42.45s
+Run 2/5: Cost = 4.70e+07, Violoations: 0, Time = 42.39s
+Run 3/5: Cost = 1.40e+08, Violoations: 1, Time = 42.45s
+Run 4/5: Cost = 4.70e+07, Violoations: 0, Time = 42.59s
+Run 5/5: Cost = 4.69e+07, Violoations: 0, Time = 42.41s
+
+=== Running tournsize = 3 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 42.15s
+Run 2/5: Cost = 4.67e+07, Violoations: 0, Time = 42.02s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 41.71s
+Run 4/5: Cost = 4.67e+07, Violoations: 0, Time = 41.87s
+Run 5/5: Cost = 8.70e+07, Violoations: 1, Time = 42.08s
+
+=== Running tournsize = 4 ===
+Run 1/5: Cost = 4.67e+07, Violoations: 0, Time = 42.32s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 42.22s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 42.18s
+Run 4/5: Cost = 4.67e+07, Violoations: 0, Time = 42.29s
+Run 5/5: Cost = 4.67e+07, Violoations: 0, Time = 42.19s
+
+=== Running tournsize = 5 ===
+Run 1/5: Cost = 4.67e+07, Violoations: 0, Time = 41.97s
+Run 2/5: Cost = 4.67e+07, Violoations: 0, Time = 41.89s
+Run 3/5: Cost = 4.67e+07, Violoations: 0, Time = 41.71s
+Run 4/5: Cost = 4.66e+07, Violoations: 0, Time = 42.00s
+Run 5/5: Cost = 4.67e+07, Violoations: 0, Time = 41.72s
+Saved results for tournsize_pop_5 to output\tournsize_pop_5.txt
+
+=== Running indp = 0.1 ===
+Run 1/3: Cost = 4.51e+07, Violoations: 0, Time = 41.32s
+Run 2/3: Cost = 4.67e+07, Violoations: 0, Time = 41.13s
+Run 3/3: Cost = 4.69e+07, Violoations: 0, Time = 41.17s
+
+=== Running indp = 0.2 ===
+Run 1/3: Cost = 4.69e+07, Violoations: 0, Time = 41.39s
+Run 2/3: Cost = 4.66e+07, Violoations: 0, Time = 41.22s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 41.18s
+
+=== Running indp = 0.3 ===
+Run 1/3: Cost = 4.68e+07, Violoations: 0, Time = 41.57s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 41.32s
+Run 3/3: Cost = 4.68e+07, Violoations: 0, Time = 41.30s
+
+=== Running indp = 0.4 ===
+Run 1/3: Cost = 4.67e+07, Violoations: 0, Time = 42.43s
+Run 2/3: Cost = 4.68e+07, Violoations: 0, Time = 42.23s
+Run 3/3: Cost = 4.67e+07, Violoations: 0, Time = 42.26s
+Saved results for indp_pop_3 to output\indp_pop_3.txt
+
+=== Running indp = 0.1 ===
+Run 1/4: Cost = 4.68e+07, Violoations: 0, Time = 41.33s
+Run 2/4: Cost = 4.50e+07, Violoations: 0, Time = 41.06s
+Run 3/4: Cost = 4.65e+07, Violoations: 0, Time = 41.13s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 41.29s
+
+=== Running indp = 0.2 ===
+Run 1/4: Cost = 4.67e+07, Violoations: 0, Time = 41.32s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 41.21s
+Run 3/4: Cost = 4.67e+07, Violoations: 0, Time = 41.18s
+Run 4/4: Cost = 4.68e+07, Violoations: 0, Time = 41.06s
+
+=== Running indp = 0.3 ===
+Run 1/4: Cost = 4.66e+07, Violoations: 0, Time = 41.21s
+Run 2/4: Cost = 4.70e+07, Violoations: 0, Time = 41.30s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 41.45s
+Run 4/4: Cost = 4.66e+07, Violoations: 0, Time = 41.65s
+
+=== Running indp = 0.4 ===
+Run 1/4: Cost = 4.69e+07, Violoations: 0, Time = 42.19s
+Run 2/4: Cost = 4.68e+07, Violoations: 0, Time = 42.27s
+Run 3/4: Cost = 4.68e+07, Violoations: 0, Time = 42.51s
+Run 4/4: Cost = 4.69e+07, Violoations: 0, Time = 42.27s
+Saved results for indp_pop_4 to output\indp_pop_4.txt
+
+=== Running indp = 0.1 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 40.86s
+Run 2/5: Cost = 4.56e+07, Violoations: 0, Time = 40.85s
+Run 3/5: Cost = 4.67e+07, Violoations: 0, Time = 41.18s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 40.95s
+Run 5/5: Cost = 4.65e+07, Violoations: 0, Time = 41.38s
+
+=== Running indp = 0.2 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 40.71s
+Run 2/5: Cost = 4.67e+07, Violoations: 0, Time = 40.89s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 40.67s
+Run 4/5: Cost = 4.69e+07, Violoations: 0, Time = 40.61s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 40.72s
+
+=== Running indp = 0.3 ===
+Run 1/5: Cost = 4.69e+07, Violoations: 0, Time = 40.94s
+Run 2/5: Cost = 4.68e+07, Violoations: 0, Time = 41.52s
+Run 3/5: Cost = 4.69e+07, Violoations: 0, Time = 41.52s
+Run 4/5: Cost = 4.68e+07, Violoations: 0, Time = 41.44s
+Run 5/5: Cost = 4.68e+07, Violoations: 0, Time = 41.66s
+
+=== Running indp = 0.4 ===
+Run 1/5: Cost = 4.67e+07, Violoations: 0, Time = 42.41s
+Run 2/5: Cost = 4.69e+07, Violoations: 0, Time = 42.25s
+Run 3/5: Cost = 4.68e+07, Violoations: 0, Time = 42.21s
+Run 4/5: Cost = 4.69e+07, Violoations: 0, Time = 42.21s
+Run 5/5: Cost = 4.69e+07, Violoations: 0, Time = 42.37s
+Saved results for indp_pop_5 to output\indp_pop_5.txt
+PS C:\Users\Krzys\OneDrive - ETH Zurich\Materials\OMFE\bandwith-optimization> 

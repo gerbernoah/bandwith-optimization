@@ -11,7 +11,12 @@ from types2.biology import GAParams
 from typing import List, Dict, Tuple, Union
 import re
 from pathlib import Path
+<<<<<<< HEAD
 import json, os
+=======
+import json
+import os
+>>>>>>> GA_optimization
 
 """
 ==================================================
@@ -21,7 +26,8 @@ import json, os
 
 # Define input file paths; files located in "../inputs" folder
 input_dir = Path(__file__).resolve().parent.parent / "inputs"
-input_file = lambda file: str(input_dir / file)
+def input_file(file): return str(input_dir / file)
+
 
 def parse_nodes() -> Tuple[List[Node], NodeDict]:
     nodes: List[Node] = []
@@ -44,6 +50,7 @@ def parse_nodes() -> Tuple[List[Node], NodeDict]:
         nodes.append(node)
         node_dict[name] = node
     return nodes, node_dict
+
 
 def parse_demands(node_dict: NodeDict) -> List[Demand]:
     demands: List[Demand] = []
@@ -68,6 +75,7 @@ def parse_demands(node_dict: NodeDict) -> List[Demand]:
             demands.append(demand)
     return demands
 
+
 def parse_edges(node_dict: NodeDict) -> Tuple[List[Edge], List[UEdge], UEdgeToEdge]:
     edges: List[Edge] = []
     uedges: List[UEdge] = []
@@ -84,12 +92,15 @@ def parse_edges(node_dict: NodeDict) -> Tuple[List[Edge], List[UEdge], UEdgeToEd
         # \d+ = one or more digits
         # \s* = zero or more whitespace characters
         pattern = re.compile(
-            r"(\S+)\s+"                                         # edge_id                                           | group 1
-            r"\(\s*(\S+)\s+(\S+)\s*\)\s+"                       # ( source target )                                 | groups 2, 3
-            r"([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+"     # floats: pre_cap, pre_cost, route_cost, setup_cost | groups 4–7
-            r"\(\s*([\d.\s]+)\)"                                # flat list of floats                               | group 8
+            # edge_id                                           | group 1
+            r"(\S+)\s+"
+            # ( source target )                                 | groups 2, 3
+            r"\(\s*(\S+)\s+(\S+)\s*\)\s+"
+            # floats: pre_cap, pre_cost, route_cost, setup_cost | groups 4–7
+            r"([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+"
+            # flat list of floats                               | group 8
+            r"\(\s*([\d.\s]+)\)"
         )
-
 
         match = pattern.match(line)
         if not match:
@@ -98,20 +109,22 @@ def parse_edges(node_dict: NodeDict) -> Tuple[List[Edge], List[UEdge], UEdgeToEd
         # Extract: source, target, routing_cost, modules
         source, target, route_cost = match.group(2, 3, 6)
         modules_raw = match.group(8)
-        moduleGroups = re.findall(r"(\d+\.\d+)\s+(\d+\.\d+)", modules_raw) # Extract modules from string of group 8
-        modules: List[Module] = [Module(capacity=float(cap), cost=float(cost), index=index) for index, (cap, cost) in enumerate(moduleGroups)]
+        # Extract modules from string of group 8
+        moduleGroups = re.findall(r"(\d+\.\d+)\s+(\d+\.\d+)", modules_raw)
+        modules: List[Module] = [Module(capacity=float(cap), cost=float(
+            cost), index=index) for index, (cap, cost) in enumerate(moduleGroups)]
 
         # create undirected UEdge and two directed Edge objects
         uEdge = UEdge(routing_cost=float(route_cost), module_options=modules)
         edge1 = Edge(
-            source = node_dict[source],
-            target = node_dict[target],
-            uEdge = uEdge
+            source=node_dict[source],
+            target=node_dict[target],
+            uEdge=uEdge
         )
         edge2 = Edge(
-            source = node_dict[target],
-            target = node_dict[source],
-            uEdge = uEdge
+            source=node_dict[target],
+            target=node_dict[source],
+            uEdge=uEdge
         )
         edges.append(edge1)
         edges.append(edge2)
@@ -120,12 +133,14 @@ def parse_edges(node_dict: NodeDict) -> Tuple[List[Edge], List[UEdge], UEdgeToEd
 
     return edges, uedges, uedge_to_edge
 
+
 def parse_network() -> Network:
     nodes, node_dict = parse_nodes()
     edges, uedges, uedge_to_edge = parse_edges(node_dict)
-    demands= parse_demands(node_dict)
+    demands = parse_demands(node_dict)
 
     return Network(
+<<<<<<< HEAD
         nodes = nodes,
         node_dict = node_dict,
         edges = edges,
@@ -134,14 +149,31 @@ def parse_network() -> Network:
         demands = demands
     )
 
+=======
+        nodes=nodes,
+        node_dict=node_dict,
+        edges=edges,
+        uedges=uedges,
+        uedge_to_edge=uedge_to_edge,
+        demands=demands
+    )
+
+
+>>>>>>> GA_optimization
 """
 ==================================================
  OUTPUT
 ==================================================
 """
 
+<<<<<<< HEAD
 def write_parameter_results(
     param_name: str,
+=======
+
+def write_parameter_results(
+    file_name: str,
+>>>>>>> GA_optimization
     base_params: GAParams,
     values: List[Union[int, float]],
     results: List[List[float]],
@@ -155,15 +187,26 @@ def write_parameter_results(
     Line 3: JSON list of results lists
     Line 4: JSON list of runtime lists
     """
+<<<<<<< HEAD
     filename = f"{param_name}.txt"
     filepath = os.path.join("output", filename)
     
+=======
+    filename = f"{file_name}.txt"
+    filepath = os.path.join("output", filename)
+
+>>>>>>> GA_optimization
     with open(filepath, 'w') as f:
         f.write(json.dumps(base_params.__dict__) + "\n")
         f.write(json.dumps(values) + "\n")
         f.write(json.dumps(results) + "\n")
         f.write(json.dumps(runtimes) + "\n")
+<<<<<<< HEAD
     print(f"Saved results for {param_name} to {filepath}")
+=======
+    print(f"Saved results for {file_name} to {filepath}")
+
+>>>>>>> GA_optimization
 
 def read_parameter_results(filepath: str):
     """
@@ -178,5 +221,10 @@ def read_parameter_results(filepath: str):
         values = json.loads(lines[1].strip())
         results = json.loads(lines[2].strip())
         runtimes = json.loads(lines[3].strip())
+<<<<<<< HEAD
     
     return base_params, values, results, runtimes
+=======
+
+    return base_params, values, results, runtimes
+>>>>>>> GA_optimization

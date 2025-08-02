@@ -61,6 +61,11 @@ class GAParams:
     - max_module_ratio: initial population % with maximum capacity modules selected
     - min_module_ratio: initial population % with minimal capacity modules selected
     - muLambda = (mu, lambda): mu*npop = nr of individuals selected per gen., lambda*npop = number of offspring created each gen.
+<<<<<<< HEAD
+=======
+    - tournsize: fkjdslaöjfdklösa
+    - indp: independent probability, the probability applied to each gene independently during mutation
+>>>>>>> GA_optimization
     """
     npop: int
     cxpb: float
@@ -70,6 +75,11 @@ class GAParams:
     max_module_ratio: float
     min_module_ratio: float
     muLambda: Tuple[float, float]
+<<<<<<< HEAD
+=======
+    tournsize: int
+    indp: float
+>>>>>>> GA_optimization
 
     def toString(self):
         return f"GAParams: {self.npop}, {self.cxpb}, {self.mutpb}, {self.ngen}, {self.penalty_coeff}, {self.max_module_ratio}, {self.min_module_ratio}, {self.muLambda}"

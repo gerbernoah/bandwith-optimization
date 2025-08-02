@@ -18,8 +18,8 @@ network = parse_network()
     INTEGER PROGRAMMING
 ==================================================
 """
-# results = run_IP(network, timeLimit=10)
-# print_summary("IP", results)
+resultsIP = run_IP(network, timeLimit=3*60)
+print_summary("IP", resultsIP)
 
 """
 ==================================================
@@ -30,6 +30,7 @@ network = parse_network()
 # print_summary("GA", results)
 
 base_params = GAParams(
+<<<<<<< HEAD
     npop = 100,
     cxpb = 0.8,
     mutpb = 0.2,
@@ -56,3 +57,42 @@ param_lists_names = ["mutpb", "penalty_coeff"]
 
 plot_parameter_runtime("penalty_coeff")
 plot_parameter_performance("penalty_coeff", optimum)
+=======
+    npop=80,
+    cxpb=0.6,
+    mutpb=0.2,
+    ngen=40,
+    penalty_coeff=100000.0,
+    max_module_ratio=0.4,
+    min_module_ratio=0.2,
+    muLambda=(1, 1.7),
+    indp=0.4,
+    tournsize=3
+)
+
+# number of runs per param value
+# nruns = [18, 19, 20]
+nruns = [3, 4, 5]
+
+# Define param values
+cxpb = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+mutpb = [0.1, 0.2, 0.3, 0.4]
+penalty_coeff = [10, 100, 1000, 10000, 100000, 1000000]
+tournsize = [2, 3, 4, 5]
+indp = [0.1, 0.2, 0.3, 0.4]
+
+# Run GA
+param_lists = [cxpb, mutpb, penalty_coeff, tournsize, indp]
+param_lists_names = ["cxpb", "mutpb", "penalty_coeff", "tournsize", "indp"]
+for i in range(len(param_lists)):
+
+    file_names = []
+    for j in range(len(nruns)):
+        file_name = param_lists_names[i] + "_pop_" + str(nruns[j])
+        file_names.append(file_name)
+        run_parameter_analysis(network, file_name, base_params, param_lists_names[i], param_lists[i], nruns[j])
+
+
+    plot_parameter_performance(param_lists_names[i], file_names, nruns, resultsIP.total_cost)
+    plot_parameter_runtime(param_lists_names[i], file_names, nruns, resultsIP.total_runtime)
+>>>>>>> GA_optimization
