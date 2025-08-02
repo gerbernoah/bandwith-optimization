@@ -38,7 +38,12 @@ base_params = GAParams(
     max_module_ratio = 0.4,
     min_module_ratio = 0.2,
     muLambda = (1, 1.7),
+    indp = 0.4,
+    tournsize = 3
 )
+
+# population
+pops = [18, 19, 20]
 
 # Define param values
 cxpb = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
@@ -49,10 +54,13 @@ penalty_coeff = [10, 100, 1000, 10000, 100000, 1000000]
 optimum = 30000000
 param_lists = [mutpb, penalty_coeff]
 param_lists_names = ["mutpb", "penalty_coeff"]
-# for i in range(len(param_lists)):
-#     run_parameter_analysis(network, base_params, param_lists_names[i], param_lists[i], 3)
-#     plot_parameter_performance(param_lists_names[i], optimum)
-#     plot_parameter_runtime(param_lists_names[i])
+for i in range(len(param_lists)):
+    
+    for j in range(len(pops)):
+        # CHANGE POP
+        run_parameter_analysis(network, base_params, param_lists_names[i], param_lists[i], 3)
+    plot_parameter_performance(param_lists_names[i], optimum)
+    plot_parameter_runtime(param_lists_names[i])
 
 plot_parameter_runtime("penalty_coeff")
 plot_parameter_performance("penalty_coeff", optimum)

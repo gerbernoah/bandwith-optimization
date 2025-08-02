@@ -185,7 +185,7 @@ def evaluate_individual(individual: GAIndividual, network: Network, penalty_coef
     
     return (total_cost,)
 
-def setup_toolbox(network: Network, penalty_coeff, max_module_ratio=0.3, min_module_ratio=0.2):
+def setup_toolbox(network: Network, penalty_coeff, max_module_ratio=0.3, indp=0.1, tournsize=3 min_module_ratio=0.2):
     """
     Setup DEAP toolbox with network-specific parameters
     Args:
@@ -216,8 +216,8 @@ def setup_toolbox(network: Network, penalty_coeff, max_module_ratio=0.3, min_mod
 
     toolbox.register("population", init_population) # type: ignore
     toolbox.register("mate", cx_uniform)
-    toolbox.register("mutate", mut_custom, indpb=0.1, uedges=uedges)
-    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("mutate", mut_custom, indpb=indp, uedges=uedges)
+    toolbox.register("select", tools.selTournament, tournsize=tournsize)
     toolbox.register("evaluate", evaluate_individual, network=network, penalty_coeff=penalty_coeff)
     
     return toolbox
@@ -259,7 +259,13 @@ def run_GA(
     global_demand_paths = precompute_demand_paths(network)
     
     # Setup GA
-    toolbox = setup_toolbox(network, p.penalty_coeff)
+    toolbox = setup_toolbox(
+        network=network, 
+        penalty_coeff=p.penalty_coeff, 
+        max_module_ratio=p.max_module_ratio,
+        indp=p.indp,
+        tournsize=p.tournsize
+    )
     _, _, _, uedges, _, demands = network.unpack()
     
     # Run GA
