@@ -10,7 +10,14 @@ This project applies advanced optimization techniques to solve a real-world netw
 <https://sndlib.put.poznan.pl/home.action>
 
 
-# Usage Inscructions
+# Overview & Usage Inscructions
+
+#### Folders
+- `algorithms`: contains implementation of Genetic Algorithm and Integer Programming
+- `inputs`: input data in form of text files
+- `plots`: plots visualizing the results
+- `output`: logging, information about the computational runs
+- `types2`, `utilities`: aids for copmutation and implementation
 
 > run main.py with the following folder hierarchy for correct "import" usage
 >```
@@ -25,11 +32,3 @@ This project applies advanced optimization techniques to solve a real-world netw
 - run `utilities.parsing.parse_network()` to parse all input data: returns `Network`
 - run `algorithms.integer_programming.run_IP(Network)` to optimize network: returns `ResultIP`
 - run `algorithms.genetic_algorithm.run_GA(Network)` to optimize network: returns `ResultGA`
-
-# QUICK NOTES
-
-- both IP and GA seem to be working
-- GA seems to be worse than IP right now
-- GA needs to be optimized
-- RUNTIMES of both algorithms are still needed
-- GA code still has some hardcoded values, like 5 shortest paths per demand, or the parameters like population count, nr of generations
